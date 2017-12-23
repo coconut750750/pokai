@@ -98,7 +98,7 @@ class Hand(object):
 		s = sep
 		for card in self.cards:
 			s += card.display + sep
-		return s.strip()
+		print(s.strip())
 
 	def print_categories(self):
 		for i, j in self.categories.items():

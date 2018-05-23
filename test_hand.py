@@ -37,24 +37,24 @@ class TestHand(object):
 
     def test_hand_add_card_new(self):
         """testing add card works"""
-        prev_len = self.test_hand.length()
+        prev_len = self.test_hand.num_cards()
         assert not self.test_hand.contains(card.Card('4', 'h'))
         self.test_hand.add_cards([card.Card('4', 'h')])
         assert self.test_hand.contains(card.Card('4', 'h'))
-        assert self.test_hand.length() == prev_len + 1
+        assert self.test_hand.num_cards() == prev_len + 1
 
     def test_hand_add_card_dup(self):
         """testing add duiplicate card doesnt work"""
-        prev_len = self.test_hand.length()
+        prev_len = self.test_hand.num_cards()
         assert self.test_hand.contains(card.Card('7', 'h'))
         self.test_hand.add_cards([card.Card('7', 'h')])
-        assert self.test_hand.length() == prev_len
+        assert self.test_hand.num_cards() == prev_len
 
     def test_hand_remove_card(self):
         """testing remove cards works"""
-        cards = list(self.test_hand.cards)
+        cards = list(self.test_hand.get_cards())
         self.test_hand.remove_cards(cards)
-        assert not self.test_hand.cards
+        assert not self.test_hand.num_cards()
 
     def test_hand_sort_cards_simple(self):
         """test lowest card has lowest val"""
@@ -63,5 +63,5 @@ class TestHand(object):
     def test_hand_sort_cards_order(self):
         """test other cards have values greater at equal to lowest card"""
         lowest_val = self.test_hand.get_card(0).value
-        for c in self.test_hand.cards:
-            assert c.value >= lowest_val
+        for i in range(self.test_hand.num_cards()):
+            assert self.test_hand.get_card(i).value >= lowest_val

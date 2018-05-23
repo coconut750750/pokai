@@ -1,5 +1,7 @@
 """
 Hand object
+Contains a list of cards, _cards.
+Contains a dictionary of categories that a hand can play
 """
 
 from itertools import groupby
@@ -18,46 +20,50 @@ class Hand(object):
     """docstring for Hand"""
     def __init__(self, cards):
         super(Hand, self).__init__()
-        self.cards = cards
+        self._cards = cards
+        self._categories = {}
         self.sort_cards()
-        self.organize()
+        self._organize()
 
     def get_next_play(self):
         play = []
         for play_type in ORDER:
-            if not self.categories[play_type]:
+            if not self._categories[play_type]:
                 continue
             else:
-                play += self.categories[play_type][0]
+                play += self._categories[play_type][0]
                 if "triples" in play_type:
-                    if len(self.categories[CATEGORIES[0]]) >= 1:
-                        play += self.categories[CATEGORIES[0]][0]
+                    if len(self._categories[CATEGORIES[0]]) >= 1:
+                        play += self._categories[CATEGORIES[0]][0]
                         if play_type == "adj_triples":
-                            play += self.categories[CATEGORIES[0]][1]
-                    elif len(self.categories[CATEGORIES[1]]) >= 1:
-                        play += self.categories[CATEGORIES[1]][0]
+                            play += self._categories[CATEGORIES[0]][1]
+                    elif len(self._categories[CATEGORIES[1]]) >= 1:
+                        play += self._categories[CATEGORIES[1]][0]
                         if play_type == "adj_triples":
-                            play += self.categories[CATEGORIES[1]][1]
+                            play += self._categories[CATEGORIES[1]][1]
                 return play
 
     def sort_cards(self):
-        self.cards.sort(key=lambda x: x.value, reverse=False)
+        """Sorts the cards in order by value"""
+        self._cards.sort(key=lambda x: x.value, reverse=False)
 
-    def organize(self):
-        self.categories = {x:[] for x in CATEGORIES}
-        counts = {value : list(g) for value, g in groupby(self.cards, lambda card: card.value)}
+    def _organize(self):
+        """Organizes the cards in categories"""
+        self._categories = {x:[] for x in CATEGORIES}
+        counts = {value : list(g) for value, g in groupby(self._cards, lambda card: card.value)}
         for value, group in counts.items():
             amount = len(group)
             for i in range(4):
                 if amount == i + 1:
-                    self.categories[CATEGORIES[i]].append(group)
+                    self._categories[CATEGORIES[i]].append(group)
                     break
-            self.organize_adj_triples(counts, value)
-        self.organize_straights(counts)
+            self._organize_adj_triples(counts, value)
+        self._organize_straights(counts)
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
-            self.categories[CATEGORIES[-1]].append([self.cards[-1], self.cards[-2]])
+            self._categories[CATEGORIES[-1]].append([self._cards[-1], self._cards[-2]])
 
-    def organize_straights(self, counts):
+    def _organize_straights(self, counts):
+        """Organize straights"""
         visited = [[-1], [-1]]
         for value, _ in counts.items():
             for i in range(1, 3):
@@ -70,22 +76,22 @@ class Hand(object):
                         straight_group.append(counts[val][j])
                     val += 1
                 if len(straight_group) // i >= SMALLEST_STRAIGHT[i - 1]:
-                    self.categories[CATEGORIES[4 + i - 1]].append(straight_group)
+                    self._categories[CATEGORIES[4 + i - 1]].append(straight_group)
                     visited[i - 1].append(straight_group[-1].value)
 
                     for j in range(0, len(straight_group), i):
                         sub_group = straight_group[j: j + i]
-                        if sub_group in self.categories[CATEGORIES[i - 1]]:
-                            self.categories[CATEGORIES[i - 1]].remove(sub_group)
+                        if sub_group in self._categories[CATEGORIES[i - 1]]:
+                            self._categories[CATEGORIES[i - 1]].remove(sub_group)
 
-    def organize_adj_triples(self, counts, value):
+    def _organize_adj_triples(self, counts, value):
         if len(counts[value]) == 3 and len(counts[value + 1]) == 3:
             pair = counts[value] + counts[value + 1]
-            self.categories[CATEGORIES[6]].append(pair)
+            self._categories[CATEGORIES[6]].append(pair)
 
     def get_low(self, other_card, num):
         if num <= 4:
-            for card_group in self.categories[CATEGORIES[num-1]]:
+            for card_group in self._categories[CATEGORIES[num-1]]:
                 card = card_group[0]
                 if card.value > other_card.value:
                     return card_group
@@ -93,7 +99,7 @@ class Hand(object):
     def get_low_straight(self, other_card, num, length):
         if length < SMALLEST_STRAIGHT[num - 1]:
             return
-        for card_group in self.categories[CATEGORIES[4 + num - 1]]:
+        for card_group in self._categories[CATEGORIES[4 + num - 1]]:
             if card_group[0].value <= other_card.value:
                 for i, c in enumerate(card_group):
                     if c.value > other_card.value and len(card_group) - i >= length * num:
@@ -103,6 +109,7 @@ class Hand(object):
                     return card_group[0: length * num]
 
     def add_cards(self, cards=[], card_strs=[]):
+        """adds a list of cards or list of string of cards to hand"""
         for c in cards:
             self._add(c)
         for card_str in card_strs:
@@ -113,41 +120,50 @@ class Hand(object):
                 suit = card_str[1].lower()
             self._add(Card(str(name), suit))
         self.sort_cards()
-        self.organize()
+        self._organize()
 
     def _add(self, card):
         if card.value > -1 and not self.contains(card):
-            self.cards.append(card)
+            self._cards.append(card)
 
     def remove_cards(self, cards):
+        """removes a list of cards from hand"""
         for c in cards:
             self._remove(c)
-        self.organize()
+        self._organize()
 
     def _remove(self, card):
         if self.contains(card):
-            self.cards.remove(card)
+            self._cards.remove(card)
 
     def contains(self, card):
-        for c in self.cards:
+        """returns true if the same card exists in hand"""
+        for c in self._cards:
             if card.display == c.display:
                 return True
         return False
 
     def get_card(self, index):
-        return self.cards[index]
+        """gets a single card at index"""
+        return self._cards[index]
 
-    def length(self):
-        return len(self.cards)
+    def get_cards(self):
+        """gets all cards in hand"""
+        return self._cards
+
+    def num_cards(self):
+        """number of cards"""
+        return len(self._cards)
 
     def print_categories(self):
-        for i, j in self.categories.items():
+        """prints out the categories of the hand"""
+        for i, j in self._categories.items():
             print("{}: {}".format(i, j))
 
     def __str__(self):
         """How the card is turned into a string"""
         sep = " | "
         s = sep
-        for card in self.cards:
+        for card in self._cards:
             s += card.display + sep
         return s.strip()

@@ -1,5 +1,5 @@
 """
-The card module. lol
+The card module.
 Contains the class for a single Poker Card Object.
 """
 

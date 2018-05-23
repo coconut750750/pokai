@@ -3,7 +3,7 @@ Hand object
 """
 
 from itertools import groupby
-from card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+from card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE
 
 SMALLEST_STRAIGHT = [5, 3]
 SMALLEST_TRIPLE_STRAIGHT = 2
@@ -102,14 +102,21 @@ class Hand(object):
                 if len(card_group) >= length * num:
                     return card_group[0: length * num]
 
-    def add_cards(self, cards):
+    def add_cards(self, cards=[], card_strs=[]):
         for c in cards:
             self._add(c)
+        for card_str in card_strs:
+            name = card_str[0].upper()
+            if name == 'Z':
+                suit = int(card_str[1])
+            else:
+                suit = card_str[1].lower()
+            self._add(Card(str(name), suit))
         self.sort_cards()
         self.organize()
 
     def _add(self, card):
-        if card.value > -1:
+        if card.value > -1 and not self.contains(card):
             self.cards.append(card)
 
     def remove_cards(self, cards):
@@ -118,19 +125,29 @@ class Hand(object):
         self.organize()
 
     def _remove(self, card):
-        if card in self.cards:
+        if self.contains(card):
             self.cards.remove(card)
+
+    def contains(self, card):
+        for c in self.cards:
+            if card.display == c.display:
+                return True
+        return False
+
+    def get_card(self, index):
+        return self.cards[index]
 
     def length(self):
         return len(self.cards)
 
-    def print(self):
+    def print_categories(self):
+        for i, j in self.categories.items():
+            print("{}: {}".format(i, j))
+
+    def __str__(self):
+        """How the card is turned into a string"""
         sep = " | "
         s = sep
         for card in self.cards:
             s += card.display + sep
-        print(s.strip())
-
-    def print_categories(self):
-        for i, j in self.categories.items():
-            print("{}: {}".format(i, j))
+        return s.strip()

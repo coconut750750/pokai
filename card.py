@@ -1,5 +1,5 @@
 """
-The card module.
+The card module. testing
 Contains the class for a single Poker Card Object.
 """
 

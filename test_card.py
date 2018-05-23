@@ -9,6 +9,7 @@ pytest test_card.py -vs
 """
 
 import card
+import sys
 
 class TestCard(object):
     """
@@ -17,7 +18,7 @@ class TestCard(object):
 
     def test_card_display_6(self):
         """Testing card displays"""
-        assert str(card.Card(card.VALUES[3], card.SUITS[2])) == '♠6'
+        assert str(card.Card(card.VALUES[3], card.SUITS[2])) == '♠8'
 
     def test_card_display_Q(self):
         """Testing card displays"""

@@ -211,7 +211,13 @@ class TestHand(object):
         c = card.Card('3', 'h')
         each_count = 1
         length = 5
-        assert self.test_hand.get_low_straight(c, each_count, length)
+        low_straight = self.test_hand.get_low_straight(c, each_count, length)
+        assert low_straight
+        assert len(low_straight) == length
+        assert low_straight[0].value > c.value
+        for i in range(length - 1):
+            assert low_straight[i].value == low_straight[i + 1].value - 1
+
 
     def test_hand_categories_single_straights_null(self):
         """tests get invalid low single straight"""

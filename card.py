@@ -34,9 +34,13 @@ class Card(object):
         else:
             name = "INVALID"
 
+    def is_royal(self):
+        """Returns true if card is greater than 10"""
+        return self.value > VALUES.index('0')
+
     def __repr__(self):
         """How the card is represented in terminal"""
-        return '[Card: {}'.format(self.display) + ']'
+        return 'Card: {}'.format(self.display) + ''
 
     def __str__(self):
         """How the card is turned into a string"""

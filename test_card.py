@@ -16,6 +16,14 @@ class TestCard(object):
     Test class for testing cards
     """
 
+    def test_card_is_royal_simple(self):
+        """Testing is royal"""
+        assert card.Card('J', card.SUITS[2]).is_royal()
+
+    def test_card_is_royal_simple2(self):
+        """Testing is royal"""
+        assert not card.Card('0', card.SUITS[2]).is_royal()
+
     def test_card_display_6(self):
         """Testing card displays"""
         assert str(card.Card(card.VALUES[3], card.SUITS[2])) == '♠6'

@@ -5,16 +5,10 @@ Contains the Hand class and other constants
 
 from itertools import groupby
 from card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+from game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from card_play import Play
 
 SMALLEST_STRAIGHT = [5, 3, 2]
-SINGLES = 'singles'
-DOUBLES = 'doubles'
-TRIPLES = 'triples'
-QUADRUPLES = 'fours'
-STRAIGHTS = 'straights'
-DOUBLE_STRAIGHTS = 'double_straights'
-ADJ_TRIPLES = 'adj_triples'
-DOUBLE_JOKER = 'double_joker'
 CATEGORIES = [SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS,
               ADJ_TRIPLES, DOUBLE_JOKER]
 ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES]
@@ -70,6 +64,8 @@ class Hand(object):
     def _organize_adj_triples(self, counts, value):
         """helper function that organizes adj triples that start
         at value"""
+        if (value + 1) not in counts:
+            return
         if len(counts[value]) == 3 and len(counts[value + 1]) == 3:
             pair = counts[value] + counts[value + 1]
             self._categories[ADJ_TRIPLES].append(pair)
@@ -77,9 +73,11 @@ class Hand(object):
     def get_lead_play(self):
         """
         Gets the best play if this player is starting.
+        Returns lead play with pos of -1 or None
         """
-        play = []
         for play_type in ORDER:
+            play = []
+            num_extra = 0
             if not self._categories[play_type]:
                 continue
             else:
@@ -89,13 +87,21 @@ class Hand(object):
                 if TRIPLES in play_type:
                     if len(self._categories[SINGLES]) >= 1:
                         play += self._categories[SINGLES][0]
+                        num_extra += 1
                         if play_type == ADJ_TRIPLES:
+                            if len(self._categories[SINGLES]) < 2:
+                                continue
                             play += self._categories[SINGLES][1]
+                            num_extra += 1
                     elif len(self._categories[DOUBLES]) >= 1:
                         play += self._categories[DOUBLES][0]
+                        num_extra += 1
                         if play_type == ADJ_TRIPLES:
+                            if len(self._categories[DOUBLES]) < 2:
+                                continue
                             play += self._categories[DOUBLES][1]
-                return play
+                            num_extra += 1
+                return Play(-1, play, num_extra, play_type)
         return None
 
     def get_low(self, other_card, each_count, extra=0):
@@ -106,6 +112,7 @@ class Hand(object):
         each_count -- if its a single, double, triple, or quad (wild)
         extra -- the number of extra cards (1 or 2 for triple)
                                            (2 or 4 for quad)
+        Returns the lowest play with pos -1 or None
         """
         if each_count < 3:
             extra = 0
@@ -132,11 +139,30 @@ class Hand(object):
         if each_count <= 4:
             for card_group in self._categories[CATEGORIES[each_count - 1]]:
                 card = card_group[0]
-                if other_card == None:
-                    return card_group + extra_cards
-                if card.value > other_card.value:
-                    return card_group + extra_cards
+                if not other_card or card.value > other_card.value:
+                    return Play(-1, card_group + extra_cards,
+                                len(extra_cards), CATEGORIES[each_count - 1])
 
+        return None
+
+    def get_second_low(self, other_card, each_count, extra=0):
+        """
+        Gets the second lowest single that meets the properties
+        Arguments:
+        other_card -- lowest card in the single
+        each_count -- if its a single, double, triple, or quad (wild)
+        extra -- the number of extra cards (1 or 2 for triple)
+                                           (2 or 4 for quad)
+        Returns the second lowest play with pos -1 or None
+        """
+        first_low = self.get_low(other_card, each_count, extra=extra)
+        if not first_low:
+            return None
+        self.remove_cards(first_low.cards)
+        second_low = self.get_low(other_card, each_count, extra=extra)
+        self.add_cards(first_low.cards)
+        if second_low:
+            return Play(-1, second_low.cards, extra, CATEGORIES[each_count - 1])
         return None
 
     def get_low_straight(self, other_card, each_count, length):
@@ -146,38 +172,48 @@ class Hand(object):
         other_card -- lowest card in the opposing straight
         each_count -- if its a single, double, or triple straight
         length -- length of the opposing straight
+        Returns play with pos of -1 or None
         """
+        play_type = CATEGORIES[4 + each_count - 1]
         if length < SMALLEST_STRAIGHT[each_count - 1]:
             return None
-        for card_group in self._categories[CATEGORIES[4 + each_count - 1]]:
+        for card_group in self._categories[play_type]:
             if card_group[0].value <= other_card.value:
                 for i, c in enumerate(card_group):
                     if c.value > other_card.value and len(card_group) - i >= length * each_count:
-                        return card_group[i: i + length * each_count]
-            else:
-                if len(card_group) >= length * each_count:
-                    return card_group[0: length * each_count]
+                        return Play(-1, card_group[i: i + length * each_count], 0, play_type)
+            elif len(card_group) >= length * each_count:
+                return Play(-1, card_group[0: length * each_count], 0, play_type)
         return None
 
-    def get_low_adj_triple(self, other_card, extra_card_count):
+    def get_low_adj_triple(self, other_card, extra_cards):
         """
         Gets the lowest adj triple that meets the properties
         Arguments:
         other_card -- the lowest card value of the triples
-        extra_card_count -- 1 if it carries 2 singles
-                            2 if it carries 2 doubles
+        extra_cards -- 2 if it carries 2 singles
+                       4 if it carries 2 doubles
+        Returns play with pos of -1 or None
         """
+        extra_cards = int(extra_cards / 2)
         foundation = self.get_low_straight(other_card, 3, 2)
-        extra = self.get_low(None, extra_card_count)
-        return foundation + extra
+        extra1 = self.get_low(None, extra_cards)
+        extra2 = self.get_second_low(None, extra_cards)
+        if not foundation or not extra1 or not extra2:
+            return None
+        # need to get second low
+        return Play(-1, foundation.cards + extra1.cards + extra2.cards, extra_cards, ADJ_TRIPLES)
 
     def get_low_wild(self, other_card):
-        """Returns the lowest wild that is above given card"""
+        """
+        Returns the lowest wild play that is above given card
+        Pos of the play is -1
+        """
         lowest_four = self.get_low(other_card, 4)
         if lowest_four:
-            return lowest_four
+            return Play(-1, lowest_four.cards, 0, QUADRUPLES)
         if self._categories[DOUBLE_JOKER]:
-            return self._categories[DOUBLE_JOKER]
+            return Play(-1, self._categories[DOUBLE_JOKER][0], 0, DOUBLE_JOKER)
         return None
 
     def add_cards(self, cards=None, card_strs=None):

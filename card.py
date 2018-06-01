@@ -36,7 +36,24 @@ class Card(object):
 
     def is_royal(self):
         """Returns true if card is greater than 10"""
-        return self.value > VALUES.index('0')
+        # return self.value > VALUES.index('0')
+        # value of card 10 is 7
+        return self.value > 7
+
+    def __lt__(self, other):
+        return other != None and self.value < other.value
+
+    def __le__(self, other):
+        return other != None and self.value <= other.value
+
+    def __eq__(self, other):
+        return other != None and str(self) == str(other)
+
+    def __ge__(self, other):
+        return other != None and self.value >= other.value
+
+    def __gt__(self, other):
+        return other != None and self.value > other.value
 
     def __repr__(self):
         """How the card is represented in terminal"""

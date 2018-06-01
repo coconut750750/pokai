@@ -6,6 +6,8 @@ Contains the class for a single Poker Card Object.
 VALUES = '34567890JQKA2Z'
 SUITS = 'hdsc'
 VALUE_DISPLAY = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2', 'joker', 'JOKER']
+MIN_VALUE = 0
+MAX_VALUE = 14
 SMALL_JOKER_VALUE = 13
 BIG_JOKER_VALUE = 14
 SUIT_DISPLAY = ['♥', '♦', '♠', '♣']

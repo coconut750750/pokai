@@ -4,14 +4,15 @@ Contains the Hand class and other constants
 """
 
 from itertools import groupby
-from card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+from card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
 from game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from card_play import Play
 
+STRAIGHT_TERMINAL_VAL = 11
 SMALLEST_STRAIGHT = [5, 3, 2]
 CATEGORIES = [SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS,
               ADJ_TRIPLES, DOUBLE_JOKER]
-ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES]
+ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER]
 WILDS = [DOUBLE_JOKER, QUADRUPLES]
 
 class Hand(object):
@@ -34,11 +35,15 @@ class Hand(object):
     def _organize(self):
         """Organizes the cards in categories"""
         self._categories = {x:[] for x in CATEGORIES}
+        # {card_value_int : [card1, card2]}
         counts = {value : list(c) for value, c in groupby(self._cards, lambda card: card.value)}
-        for value, card_group in counts.items():
-            amount = len(card_group) - 1
+        for value in range(MIN_VALUE, MAX_VALUE + 1):
+            if not value in counts:
+                continue
+            card_group = counts[value]
+            index = len(card_group) - 1
             for i in range(4):
-                if amount == i:
+                if index == i:
                     self._categories[CATEGORIES[i]].append(card_group)
                     break
             self._organize_adj_triples(counts, value)
@@ -50,11 +55,15 @@ class Hand(object):
         """helper function that organizes straights"""
         for i in range(2):
             last_visited = -1
-            for value, _ in counts.items():
+            for value in range(MIN_VALUE, MAX_VALUE + 1):
+                if not value in counts:
+                    continue
+
                 if value <= last_visited:
                     continue
                 straight_group = []
-                while value in counts and len(counts[value]) > i:
+                # make sure value is Ace or less
+                while value in counts and value <= STRAIGHT_TERMINAL_VAL and len(counts[value]) > i:
                     straight_group += counts[value][0: i + 1]
                     value += 1
                 if len(straight_group) // (i + 1) >= SMALLEST_STRAIGHT[i]:
@@ -75,6 +84,7 @@ class Hand(object):
         Gets the best play if this player is starting.
         Returns lead play with pos of -1 or None
         """
+        # changes this to get_low() s
         for play_type in ORDER:
             play = []
             num_extra = 0

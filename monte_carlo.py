@@ -8,24 +8,19 @@ from game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_
 from hand import Hand
 from random import randint
 
-def simulate_one_game(hand, n_cards1, n_cards2, display):
+def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
     """
     Simulates 1 game with:
     hand -- starting hand
-    n_cards1 -- number of cards in opponent 1's hand
-    n_cards2 -- number of cards in opponent 2's hand
+    hand1 -- opponent 1's hand
+    hand2 -- opponent 2's hand
+    start_pos -- player that starts
+    used_cards -- list of used cards
+    display -- print out results if True
 
     Returns if hand wins the game
     TODO: use the used_cards list to strategically play cards
     """
-
-    used_cards = hand.get_cards()
-    deck = game_tools.get_new_shuffled_deck()
-    deck = game_tools.remove_from_deck(deck, used_cards)
-
-    hand1 = Hand(deck[0: n_cards1])
-    hand2 = Hand(deck[n_cards1: n_cards1 + n_cards2])
-
     if display:
         print("Player 0:", hand)
         print("Player 1:", hand1)
@@ -34,9 +29,7 @@ def simulate_one_game(hand, n_cards1, n_cards2, display):
 
     hands = [hand, hand1, hand2]
 
-    used_cards = deck[n_cards2:]
-
-    turn = randint(0, 2)
+    turn = start_pos
     end = hand.num_cards() == 0 or hand1.num_cards() == 0 or hand2.num_cards() == 0
     prev_play = None
 
@@ -57,7 +50,7 @@ def simulate_one_game(hand, n_cards1, n_cards2, display):
             elif prev_play.play_type == DOUBLES:
                 next_play = hands[turn].get_low(prev_play.get_base_card(), 2)
             elif prev_play.play_type == TRIPLES:
-                next_play = hands[turn].get_low(prev_play.get_base_card(), 2,
+                next_play = hands[turn].get_low(prev_play.get_base_card(), 3,
                                                 prev_play.num_extra)
             elif prev_play.play_type == STRAIGHTS:
                 next_play = hands[turn].get_low_straight(prev_play.get_base_card(),
@@ -71,9 +64,10 @@ def simulate_one_game(hand, n_cards1, n_cards2, display):
             else: # prev_play.play_type == QUADRUPLES or DOUBLE_JOKER:
                 next_play = hands[turn].get_low_wild(prev_play.get_base_card())
 
-            # if next play is none, check if any wilds and play
-            # wilds only if triples, straights, double_straights, and adj_triples
-            if not next_play:
+            # if next play is none and the player has less than 5 cards,
+            # check if any wilds and play wilds only if triples, straights,
+            # double_straights, and adj_triples
+            if not next_play and hands[prev_play.position].num_cards() <= 5:
                 if prev_play.play_type != SINGLES and prev_play.play_type != DOUBLES:
                     next_play = hands[turn].get_low_wild(prev_play.get_base_card())
 
@@ -90,9 +84,34 @@ def simulate_one_game(hand, n_cards1, n_cards2, display):
         if prev_play and prev_play.play_type != DOUBLE_JOKER:
             turn = (turn + 1) % game_tools.NUM_PLAYERS
 
+        # if display:
+        #     print("Player 0:", hand)
+        #     print("Player 1:", hand1)
+        #     print("Player 2:", hand2)
+            
         end = hand.num_cards() == 0 or hand1.num_cards() == 0 or hand2.num_cards() == 0
 
     return hand.num_cards() == 0
+
+def simulate_one_random_game(hand, n_cards1, n_cards2, display):
+    """
+    Simulates 1 random game with:
+    hand -- starting hand
+    n_cards1 -- number of cards in opponent 1's hand
+    n_cards2 -- number of cards in opponent 2's hand
+    display -- print out results if True
+
+    Returns if hand wins the game
+    """
+    deck = game_tools.get_new_shuffled_deck()
+    deck = game_tools.remove_from_deck(deck, hand.get_cards())
+
+    hand1 = Hand(deck[0: n_cards1])
+    hand2 = Hand(deck[n_cards1: n_cards1 + n_cards2])
+
+    used_cards = deck[n_cards2:]
+
+    return simulate_one_game(hand, hand1, hand2, randint(0, 2), used_cards, display)
 
 def simulate(hand, n_games, n_cards1, n_cards2, display=False):
     """
@@ -109,7 +128,7 @@ def simulate(hand, n_games, n_cards1, n_cards2, display=False):
         if display:
             print("Simulation {}".format(count))
         hand_sim = copy.deepcopy(hand)
-        if simulate_one_game(hand_sim, n_cards1, n_cards2, display=display):
+        if simulate_one_random_game(hand_sim, n_cards1, n_cards2, display=display):
             wins += 1
 
     return wins

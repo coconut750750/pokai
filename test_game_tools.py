@@ -22,7 +22,6 @@ class TestTools(object):
         cleaned = remove_from_deck(deck, cards)
         assert cleaned
         assert len(cleaned) == 54 - len(cards)
-        print(cleaned)
         for c in cards:
             assert c not in cleaned
 

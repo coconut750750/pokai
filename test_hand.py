@@ -87,8 +87,8 @@ class TestHand(object):
     """
 
     def test_hand_organize_cards_print(self):
-        """prints out hand categories"""
-        print(self.test_hand.print_categories())
+        """test that organize runs with no errors"""
+        self.test_hand._organize()
 
     """
     SORT CARDS
@@ -110,7 +110,7 @@ class TestHand(object):
 
     def test_hand_get_lead_play(self):
         """tests get lead play simple"""
-        print(self.test_hand.get_lead_play())
+        assert self.test_hand.get_lead_play()
 
     """
     GET LOW

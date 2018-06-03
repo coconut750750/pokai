@@ -8,6 +8,7 @@ from random import randint
 import game_tools
 from game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from hand import Hand
+from player import Player
 
 def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
     """
@@ -19,8 +20,8 @@ def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
     used_cards -- list of used cards
     display -- print out results if True
 
+    To simulate hands fairly, we use a basic Poker player to wrap all hands
     Returns if hand wins the game
-    TODO: use the used_cards list to strategically play cards
     """
     if display:
         print("Player 0:", hand)
@@ -29,52 +30,16 @@ def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
         print("simulation start")
 
     hands = [hand, hand1, hand2]
+    players = [Player(hands[0], 0, ""), Player(hands[1], 1, ""), Player(hands[2], 2, "")]
 
     turn = start_pos
     end = hand.num_cards() == 0 or hand1.num_cards() == 0 or hand2.num_cards() == 0
     prev_play = None
 
     while not end:
-        next_play = None
-        if not prev_play or prev_play.position == turn:
-            # lead play
-            next_play = hands[turn].get_lead_play()
-            if not next_play:
-                break
-            next_play.pos = turn
-
-            hands[turn].remove_cards(next_play.cards)
-        else:
-            # need to beat prev play
-            if prev_play.play_type == SINGLES:
-                next_play = hands[turn].get_low(prev_play.get_base_card(), 1)
-            elif prev_play.play_type == DOUBLES:
-                next_play = hands[turn].get_low(prev_play.get_base_card(), 2)
-            elif prev_play.play_type == TRIPLES:
-                next_play = hands[turn].get_low(prev_play.get_base_card(), 3,
-                                                prev_play.num_extra)
-            elif prev_play.play_type == STRAIGHTS:
-                next_play = hands[turn].get_low_straight(prev_play.get_base_card(),
-                                                         1, prev_play.num_base_cards())
-            elif prev_play.play_type == DOUBLE_STRAIGHTS:
-                next_play = hands[turn].get_low_straight(prev_play.get_base_card(),
-                                                         2, int(prev_play.num_base_cards() / 2))
-            elif prev_play.play_type == ADJ_TRIPLES:
-                next_play = hands[turn].get_low_adj_triple(prev_play.get_base_card(),
-                                                           prev_play.num_extra)
-            else: # prev_play.play_type == QUADRUPLES or DOUBLE_JOKER:
-                next_play = hands[turn].get_low_wild(prev_play.get_base_card())
-
-            # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
-            # check if any wilds and play wilds only if triples, straights,
-            # double_straights, and adj_triples
-            if not next_play and hands[prev_play.position].num_cards() <= 5 * hands[turn].get_num_wild():
-                if prev_play.play_type != SINGLES and prev_play.play_type != DOUBLES:
-                    next_play = hands[turn].get_low_wild(prev_play.get_base_card())
+        next_play = players[turn].get_play(prev_play, hands, used_cards)
 
         if next_play:
-            hands[turn].remove_cards(next_play.cards)
-            next_play.position = turn
             if display:
                 print(next_play)
             if next_play.play_type == DOUBLE_JOKER:
@@ -137,8 +102,13 @@ def simulate(hand, n_games, n_cards1, used_cards, display=False):
 def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_threads, display=False):
     """
     Simulates n games but uses multiple processes
-
+    hand -- starting hand
+    n_games -- number of games
+    n_cards1 -- number of cards in opponent 1's hand
+                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
+    used_cards -- list of revealed cards
     n_threads -- number of processes
+    Returns number of wins
     """
 
     manager = multiprocessing.Manager()
@@ -164,7 +134,13 @@ def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_threads, disp
     return sum(return_list)
 
 def estimate_hand_strength(hand, n_cards1, used_cards):
-    """Estimates hand strength by estimating the probability that the hand wins"""
+    """
+    Estimates hand strength by estimating the probability that the hand wins
+    hand -- the hand to test
+    n_cards1 -- number of cards in opponent 1's hand
+                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
+    used_cards -- list of revealed cards
+    """
     plays = 1000
     return simulate_multiprocesses(hand, plays, n_cards1, used_cards, 2) / plays
 

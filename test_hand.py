@@ -8,6 +8,7 @@ pytest test_card.py -vs
 -s : switch (allows printing)
 """
 
+import copy
 import card
 import hand
 
@@ -203,11 +204,11 @@ class TestHand(object):
         c = card.Card('3', 'h')
         each_count = 1
 
-        initial = str(self.test_hand)
+        initial = copy.deepcopy(self.test_hand)
         first_low_cards = self.test_hand.get_low(c, each_count).cards
         second_low_cards = self.test_hand.get_second_low(c, each_count).cards
         assert first_low_cards and second_low_cards
-        assert initial == str(self.test_hand) # hand shouldn't change
+        assert initial == self.test_hand # hand shouldn't change
         assert second_low_cards[0] > c
         assert len(second_low_cards) == 1
         assert second_low_cards[0] >= first_low_cards[0]
@@ -376,7 +377,7 @@ class TestHand(object):
         assert low_cards
         assert len(low_cards) == 4
 
-    def test_hand_get_low_triple_double_valid(self):
+    def test_hand_get_low_triple_double_none(self):
         """tests get low triple double where other card is None"""
         c = None
         each_count = 3
@@ -386,16 +387,16 @@ class TestHand(object):
         assert len(low_cards) == 5
         assert low_cards[3].value == low_cards[4].value
 
-    def test_hand_get_second_low_single_valid(self):
+    def test_hand_get_second_low_single_none(self):
         """tests get second low where other card is None"""
         c = None
         each_count = 1
 
-        initial = str(self.test_hand)
+        initial = copy.deepcopy(self.test_hand)
         first_low_cards = self.test_hand.get_low(c, each_count).cards
         second_low_cards = self.test_hand.get_second_low(c, each_count).cards
         assert first_low_cards and second_low_cards
-        assert initial == str(self.test_hand) # hand shouldn't change
+        assert initial == self.test_hand # hand shouldn't change
         assert len(second_low_cards) == 1
         assert second_low_cards[0] >= first_low_cards[0]
 

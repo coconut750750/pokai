@@ -41,11 +41,11 @@ class Hand(object):
             if not value in counts:
                 continue
             card_group = counts[value]
-            index = len(card_group) - 1
+            cg_len = len(card_group)
             for i in range(4):
-                if index == i:
-                    self._categories[CATEGORIES[i]].append(card_group)
-                    break
+                if cg_len >= i + 1:
+                    self._categories[CATEGORIES[i]].append(card_group[:i+1])
+
             self._organize_adj_triples(counts, value)
         self._organize_straights(counts)
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
@@ -297,6 +297,13 @@ class Hand(object):
             print("\n{}:".format(i))
             for k in j:
                 print('|' + ' '.join('{}'.format(str(l)) for l in k) + '|')
+
+    def __eq__(self, other):
+        """equality function"""
+        for c in self._cards:
+            if c not in other._cards:
+                return False
+        return True
 
     def __str__(self):
         """How the card is turned into a string"""

@@ -31,8 +31,10 @@ class AIPlayer(Player):
             self._straight_start = 5
             self._straight_end = 12
             self._straight_diff = 1
-        # the greater it is, the early player will bomb
+        # the greater it is, the earlier player will bomb, use ace, use two
         self.bomb_threshold = 5
+        self.use_ace_threshold = 5
+        self.use_two_threshold = 5
 
     def get_lead_play(self, in_game_hands, used_cards):
         """

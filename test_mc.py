@@ -2,6 +2,7 @@
 Testing module for Monte Carlo simulations
 """
 
+import time
 from monte_carlo import *
 import card
 import hand
@@ -51,33 +52,56 @@ class TestMC(object):
 
     def test_simulate_one_random(self):
         """tests the simulation of one game"""
-        simulate_one_random_game(self.test_hand_lv1, 17, 17, False)
+        simulate_one_random_game(self.test_hand_lv1, 17, [], False)
 
     def test_simulate_multiple_lv1(self):
         """tests simulation on level 1 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv1, plays, 17, 17) / plays)
+        print(simulate(self.test_hand_lv1, plays, 17, []) / plays)
 
     def test_simulate_multiple_lv2(self):
         """tests simulation on level 2 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv2, plays, 17, 17) / plays)
+        print(simulate(self.test_hand_lv2, plays, 17, []) / plays)
 
     def test_simulate_multiple_lv3(self):
         """tests simulation on level 3 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv3, plays, 17, 17) / plays)
+        print(simulate(self.test_hand_lv3, plays, 17, []) / plays)
 
     def test_simulate_multiple_lv4(self):
         """tests simulation on level 4 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv4, plays, 17, 17) / plays)
+        print(simulate(self.test_hand_lv4, plays, 17, []) / plays)
 
     def test_simluate_multiple_correct_order(self):
         """tests that lv1, lv2, lv3, lv4 strength in correct way"""
-        plays = 1000
-        sim1 = simulate(self.test_hand_lv1, plays, 17, 17) / plays
-        sim2 = simulate(self.test_hand_lv2, plays, 17, 17) / plays
-        sim3 = simulate(self.test_hand_lv3, plays, 17, 17) / plays
-        sim4 = simulate(self.test_hand_lv4, plays, 17, 17) / plays
+        plays = 200
+        sim1 = simulate(self.test_hand_lv1, plays, 17, []) / plays
+        sim2 = simulate(self.test_hand_lv2, plays, 17, []) / plays
+        sim3 = simulate(self.test_hand_lv3, plays, 17, []) / plays
+        sim4 = simulate(self.test_hand_lv4, plays, 17, []) / plays
         assert sim1 < sim2 and sim2 < sim3 and sim3 < sim4
+
+    def test_simulate_multiprocesses(self):
+        """tests that multiprocesses makes it faster and is accurate"""
+        plays = 1000
+        processes = 2
+        time1 = time.time()
+        original = simulate(self.test_hand_lv3, plays, 17, []) / plays
+        time2 = time.time()
+        multiprocesses = simulate_multiprocesses(self.test_hand_lv3, plays,
+                                                 17, [], processes) / plays
+        time3 = time.time()
+
+        print(original, multiprocesses)
+        print(time2-time1, time3-time2)
+        # check that it was faster
+        assert time2 - time1 > time3 - time2
+        # check that it was accurate enough
+        assert original / multiprocesses > 0.9 and original / multiprocesses < 1.1
+
+    def test_estimate_hand_strength(self):
+        """tests estmiate hand strength"""
+        strength = estimate_hand_strength(self.test_hand_lv2, 20, [])
+        assert strength >= 0 and strength <= 1

@@ -105,14 +105,6 @@ class TestHand(object):
             assert self.test_hand.get_card(i) >= low
 
     """
-    GET LEAD PLAY
-    """
-
-    def test_hand_get_lead_play(self):
-        """tests get lead play simple"""
-        assert self.test_hand.get_lead_play()
-
-    """
     GET LOW
     """
 
@@ -258,14 +250,14 @@ class TestHand(object):
             assert low_straight[i].value == low_straight[i + 1].value - 1
 
 
-    def test_hand_categories_single_straights_invalid(self):
+    def test_hand_single_straights_invalid(self):
         """tests get invalid low single straight"""
         c = card.Card('5', 'h')
         each_count = 1
         length = 5
         assert not self.test_hand.get_low_straight(c, each_count, length)
 
-    def test_hand_categories_double_straights_valid(self):
+    def test_hand_double_straights_valid(self):
         """tests get valid low double straight"""
         c = card.Card('3', 'h')
         each_count = 2
@@ -278,14 +270,14 @@ class TestHand(object):
             assert low_straight[i].value == low_straight[i + 1].value
             assert low_straight[i].value == low_straight[i + 2].value - 1
 
-    def test_hand_categories_double_straights_invalid(self):
+    def test_hand_double_straights_invalid(self):
         """tests get invalid low double straight"""
         c = card.Card('0', 'h')
         each_count = 2
         length = 3
         assert not self.test_hand.get_low_straight(c, each_count, length)
 
-    def test_hand_categories_triple_straights_valid(self):
+    def test_hand_triple_straights_valid(self):
         """tests get valid low triple straight"""
         c = card.Card('4', 'h')
         each_count = 3
@@ -341,3 +333,143 @@ class TestHand(object):
         """tests get invalid low wild"""
         c = card.Card('7', 'h')
         assert not self.test_hand.get_low_wild(c)
+
+    """
+    GET NONE LOWS
+    """
+
+    def test_hand_get_none_low_single(self):
+        """tests get low single where other card is None"""
+        c = None
+        each_count = 1
+        low_cards = self.test_hand.get_low(c, each_count).cards
+        assert low_cards
+        assert len(low_cards) == 1
+
+    def test_hand_get_none_low_double(self):
+        """tests get low double where other card is None"""
+        c = None
+        each_count = 2
+        low_cards = self.test_hand.get_low(c, each_count).cards
+        assert low_cards
+        assert len(low_cards) == 2
+        assert low_cards[0].value == low_cards[1].value
+
+    def test_hand_get_none_low_triple_alone(self):
+        """tests get low triple alone where other card is None"""
+        c = None
+        each_count = 3
+        extra = 0
+        low_cards = self.test_hand.get_low(c, each_count, extra=extra).cards
+        low = low_cards[0]
+        assert low_cards
+        assert len(low_cards) == 3
+        assert low.value == low_cards[1].value
+        assert low.value == low_cards[2].value
+
+    def test_hand_get_none_low_triple_single(self):
+        """tests get low triple single where other card is None"""
+        c = None
+        each_count = 3
+        extra = 1
+        low_cards = self.test_hand.get_low(c, each_count, extra=extra).cards
+        assert low_cards
+        assert len(low_cards) == 4
+
+    def test_hand_get_low_triple_double_valid(self):
+        """tests get low triple double where other card is None"""
+        c = None
+        each_count = 3
+        extra = 2
+        low_cards = self.test_hand.get_low(c, each_count, extra=extra).cards
+        assert low_cards
+        assert len(low_cards) == 5
+        assert low_cards[3].value == low_cards[4].value
+
+    def test_hand_get_second_low_single_valid(self):
+        """tests get second low where other card is None"""
+        c = None
+        each_count = 1
+
+        initial = str(self.test_hand)
+        first_low_cards = self.test_hand.get_low(c, each_count).cards
+        second_low_cards = self.test_hand.get_second_low(c, each_count).cards
+        assert first_low_cards and second_low_cards
+        assert initial == str(self.test_hand) # hand shouldn't change
+        assert len(second_low_cards) == 1
+        assert second_low_cards[0] >= first_low_cards[0]
+
+    """
+    GET NONE STRAIGHTS
+    """
+
+    def test_hand_single_straights_none(self):
+        """tests get valid low single straight"""
+        c = None
+        each_count = 1
+        length = 5
+        low_straight = self.test_hand.get_low_straight(c, each_count, length).cards
+        assert low_straight
+        assert len(low_straight) == length * each_count
+        for i in range(length - 1):
+            assert low_straight[i].value == low_straight[i + 1].value - 1
+
+    def test_hand_double_straights_none(self):
+        """tests get valid low double straight"""
+        c = None
+        each_count = 2
+        length = 3
+        low_straight = self.test_hand.get_low_straight(c, each_count, length).cards
+        assert low_straight
+        assert len(low_straight) == 8
+        for i in range(0, length - 2, 2):
+            assert low_straight[i].value == low_straight[i + 1].value
+            assert low_straight[i].value == low_straight[i + 2].value - 1
+
+    def test_hand_triple_straights_none(self):
+        """tests get valid low triple straight"""
+        c = None
+        each_count = 3
+        length = 2
+        low_straight = self.test_hand.get_low_straight(c, each_count, length).cards
+        assert low_straight
+        assert len(low_straight) == length * each_count
+        for i in range(0, length - 3, 3):
+            assert low_straight[i] == low_straight[i + 1]
+            assert low_straight[i] == low_straight[i + 2]
+            assert low_straight[i] == low_straight[i + 3] - 1
+
+    """
+    GET NONE ADJ TRIPLES
+    """
+
+    def test_hand_get_low_adj_trip_single_none(self):
+        """tests get valid adj trip with 2 extras"""
+        c = None
+        low_adj_trip = self.test_hand.get_low_adj_triple(c, 2).cards
+        low = low_adj_trip[0]
+        assert low_adj_trip
+        assert len(low_adj_trip) == 8
+
+    def test_hand_get_low_adj_trip_double_none(self):
+        """tests get valid adj trip with 4 extras"""
+        c = None
+        low_adj_trip = self.test_hand.get_low_adj_triple(c, 4).cards
+        low = low_adj_trip[0]
+        assert low_adj_trip
+        assert len(low_adj_trip) == 10
+
+    """
+    GET NONE WILDS
+    """
+
+    def test_hand_get_low_wild_simple_none(self):
+        """tests get valid low wild"""
+        c = None
+        low_wild = self.test_hand.get_low_wild(c).cards
+        low = low_wild[0]
+        assert low_wild
+        assert len(low_wild) == 4
+        assert low.value == low_wild[1].value
+        assert low.value == low_wild[2].value
+        assert low.value == low_wild[3].value    

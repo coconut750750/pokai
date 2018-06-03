@@ -182,12 +182,18 @@ class Hand(object):
         other_card -- lowest card in the opposing straight
         each_count -- if its a single, double, or triple straight
         length -- length of the opposing straight
+                  length is ignored when other_card is None
         Returns play with pos of -1 or None
         """
         play_type = CATEGORIES[4 + each_count - 1]
         if length < SMALLEST_STRAIGHT[each_count - 1]:
             return None
+        if not other_card:
+            if self._categories[play_type]:
+                return Play(-1, self._categories[play_type][0], 0, play_type)
+            return None
         for card_group in self._categories[play_type]:
+            # although first card is less, might be able to just take the top portion of the straight
             if card_group[0].value <= other_card.value:
                 for i, c in enumerate(card_group):
                     if c.value > other_card.value and len(card_group) - i >= length * each_count:
@@ -225,6 +231,12 @@ class Hand(object):
         if self._categories[DOUBLE_JOKER]:
             return Play(-1, self._categories[DOUBLE_JOKER][0], 0, DOUBLE_JOKER)
         return None
+
+    def get_num_wild(self):
+        """
+        Returns the number of wild cards in hand
+        """
+        return len(self._categories[DOUBLE_JOKER]) + len(self._categories[QUADRUPLES])
 
     def add_cards(self, cards=None, card_strs=None):
         """adds a list of cards or list of string of cards to hand"""

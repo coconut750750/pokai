@@ -26,7 +26,7 @@ class Play(object):
         return len(self.cards) - self.num_extra
 
     def get_base_card(self):
-        """Returns the base value of this play"""
+        """Returns the base card of this play (the card another player needs to beat)"""
         return self.cards[0]
 
     def __str__(self):

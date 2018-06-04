@@ -4,9 +4,10 @@ Provides useful functionality for game operations
 """
 
 from random import shuffle
-from card import Card, VALUES, SUITS
+from pokai.src.card import Card, VALUES, SUITS
 
 NUM_PLAYERS = 3
+TOTAL_CARDS = 52
 
 # PLAY TYPES
 SINGLES = 'singles'

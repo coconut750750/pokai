@@ -2,7 +2,7 @@
 Testing module for game tools
 """
 
-from game_tools import *
+from pokai.src.game_tools import *
 
 class TestTools(object):
     """

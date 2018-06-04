@@ -8,9 +8,11 @@ pytest test_card.py -vs
 -s : switch (allows printing)
 """
 
+import sys
+sys.path.append('../')
 import copy
-import card
-import hand
+import pokai.src.card as card
+import pokai.src.hand as hand
 
 class TestHand(object):
     """

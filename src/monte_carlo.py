@@ -5,10 +5,12 @@ Provides functionality to estimate hand and play strength
 import multiprocessing
 import copy
 from random import randint
-import game_tools
-from game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
-from hand import Hand
-from player import Player
+import pokai.src.game_tools as game_tools
+from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from pokai.src.hand import Hand
+from pokai.src.player import Player
+
+SIMULATIONS = 1000
 
 def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
     """
@@ -141,8 +143,7 @@ def estimate_hand_strength(hand, n_cards1, used_cards):
                 number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
     used_cards -- list of revealed cards
     """
-    plays = 1000
-    return simulate_multiprocesses(hand, plays, n_cards1, used_cards, 2) / plays
+    return simulate_multiprocesses(hand, SIMULATIONS, n_cards1, used_cards, 2) / SIMULATIONS
 
 def estimate_play_strength(card_play, hand, n_cards1, used_cards):
     """Estimates play strength"""

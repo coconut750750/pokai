@@ -3,9 +3,10 @@ Testing module for Monte Carlo simulations
 """
 
 import time
-from monte_carlo import *
-import card
-import hand
+import sys
+from pokai.src.monte_carlo import *
+import pokai.src.card as card
+import pokai.src.hand as hand
 
 class TestMC(object):
     """
@@ -62,7 +63,7 @@ class TestMC(object):
     def test_simulate_multiple_lv2(self):
         """tests simulation on level 2 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv2, plays, 17, []) / plays)
+        print(simulate(self.test_hand_lv2, plays, 17, [], display=True) / plays)
 
     def test_simulate_multiple_lv3(self):
         """tests simulation on level 3 hand"""

@@ -8,8 +8,7 @@ pytest test_card.py -vs
 -s : switch (allows printing)
 """
 
-import card
-import sys
+import pokai.src.card as card
 
 class TestCard(object):
     """

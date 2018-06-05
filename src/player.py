@@ -11,6 +11,8 @@ class Player(object):
         self.hand = hand
         self.position = position
         self.type = t
+        self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
+         DOUBLE_JOKER]
 
     def reveal(self):
         print(self.hand)
@@ -23,7 +25,46 @@ class Player(object):
         Gets the best play if this player is starting.
         Returns lead play
         """
-        return self.hand.get_lead_play()
+        next_play = None
+
+        for play_type in self.order:
+            if play_type == SINGLES:
+                next_play = self.hand.get_low(None, 1)
+            elif play_type == DOUBLES:
+                next_play = self.hand.get_low(None, 2)
+            elif play_type == TRIPLES:
+                next_play = self._get_lead_triple(in_game_hands, used_cards)
+            elif play_type == STRAIGHTS:
+                next_play = self._get_lead_straight(1, in_game_hands, used_cards)
+            elif play_type == DOUBLE_STRAIGHTS:
+                next_play = self._get_lead_straight(2, in_game_hands, used_cards)
+            elif play_type == ADJ_TRIPLES:
+                next_play = self._get_lead_adj_triples(in_game_hands, used_cards)
+            else: # play_type == QUADRUPLES or DOUBLE_JOKER:
+                next_play = self.hand.get_low_wild(None)
+
+            if next_play:
+                next_play.position = self.position
+                return next_play
+        return None
+
+    def _get_lead_triple(self, in_game_hands, used_cards):
+        for i in [2, 1, 0]:
+            next_play = self.hand.get_low(None, 3, i)
+            if next_play:
+                return next_play
+        return None
+
+    def _get_lead_adj_triples(self, in_game_hands, used_cards):
+        for i in [2, 4, 0]:
+            next_play = self.hand.get_low_adj_triple(None, i)
+            if next_play:
+                return next_play
+        return None
+
+    def _get_lead_straight(self, each_count, in_game_hands, used_cards):
+        next_play = self.hand.get_low_straight(None, each_count, -1)
+        return next_play
 
     def play(self, cards):
         self.hand.remove_cards(cards)

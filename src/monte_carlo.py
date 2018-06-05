@@ -9,6 +9,7 @@ import pokai.src.game_tools as game_tools
 from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from pokai.src.hand import Hand
 from pokai.src.player import Player
+from pokai.src.aiplayer import AIPlayer
 
 SIMULATIONS = 1000
 

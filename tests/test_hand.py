@@ -148,13 +148,12 @@ class TestHand(object):
         """check if wild is a wild"""
         assert wild
         l = len(wild)
+        assert l == 2 or l == 4
         if l == 4:
             TestHand._check_quadruples(wild)
         elif l == 2:
             assert wild[0].value == SMALL_JOKER_VALUE or wild[1].value == SMALL_JOKER_VALUE
             assert wild[0].value == BIG_JOKER_VALUE or wild[1].value == BIG_JOKER_VALUE
-        else:
-            assert False
 
     def test_hand_get_cards(self):
         """testing that cards are retrieved properly"""
@@ -617,168 +616,144 @@ class TestHand(object):
             cards.append(random.choice(deck + [None]))
         return hands, cards
 
-    """
-    RANDOM GET_LOW()
-    """
-
-    @classmethod
-    def _run_random_hand_get_lows(cls, _checker, plays, each_count, extra=0):
+    @staticmethod
+    def _run_random_hand(plays, get_low_type, get_low_args, _checker, _checker_args):
         """runs [plays] number of tests on random hands for get_low()"""
         random_hands, random_cards = TestHand._get_random_hands_with_opposing_card(17, plays)
         for i, h in enumerate(random_hands):
             c = random_cards[i]
-            play = h.get_low(c, each_count, extra=extra)
+            play = get_low_type(h, c, *get_low_args)
             if play:
-                if c:
+                if c and c.value < SMALL_JOKER_VALUE:
                     assert play.get_base_card() > c
-                _checker(play.cards)
-                cls._print_card_list(play, extra_msg="greater than {}".format(str(c)))
+                _checker(play.cards, *_checker_args)
+                TestHand._print_card_list(play, extra_msg="greater than {}".format(str(c)))
+
+    """
+    RANDOM GET_LOW()
+    """
 
     def test_random_hand_single(self):
         """tests get low single with random hands"""
         plays = 100
         each_count = 1
-        TestHand._run_random_hand_get_lows(TestHand._check_single, plays, each_count)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, ),
+                                  TestHand._check_single, ())
 
     def test_random_hand_doubles(self):
         """tests get low double with random hands"""
         plays = 100
         each_count = 2
-        TestHand._run_random_hand_get_lows(TestHand._check_double, plays, each_count)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, ),
+                                  TestHand._check_double, ())
 
     def test_random_hand_triple_alone(self):
         """tests get low triple with random hands"""
         plays = 100
         each_count = 3
         extra = 0
-        TestHand._run_random_hand_get_lows(TestHand._check_triple, plays, each_count, extra=extra)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_triple, ())
 
     def test_random_hand_triple_single(self):
         """tests get low triple with random hands"""
         plays = 200
         each_count = 3
         extra = 1
-        TestHand._run_random_hand_get_lows(TestHand._check_triple, plays, each_count, extra=extra)
-
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_triple, ())
     def test_random_hand_triple_double(self):
         """tests get low triple with random hands"""
         plays = 300
         each_count = 3
         extra = 2
-        TestHand._run_random_hand_get_lows(TestHand._check_triple, plays, each_count, extra=extra)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_triple, ())
 
     def test_random_hand_quad_alone(self):
         """tests get low triple with random hands"""
         plays = 400
         each_count = 4
         extra = 0
-        TestHand._run_random_hand_get_lows(TestHand._check_quadruples, plays, each_count, extra=extra)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_quadruples, ())
 
     def test_random_hand_quad_single(self):
         """tests get low triple with random hands"""
         plays = 400
         each_count = 4
         extra = 2
-        TestHand._run_random_hand_get_lows(TestHand._check_quadruples, plays, each_count, extra=extra)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_quadruples, ())
 
     def test_random_hand_quad_double(self):
         """tests get low triple with random hands"""
         plays = 400
         each_count = 4
         extra = 4
-        TestHand._run_random_hand_get_lows(TestHand._check_quadruples, plays, each_count, extra=extra)
+        TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
+                                  TestHand._check_quadruples, ())
 
     """
     RANDOM GET_LOW_STRAIGHT()
     """
-
-    @classmethod
-    def _run_random_hand_get_straights(cls, plays, each_count, length):
-        """runs [plays] number of tests on random hands for get_low()"""
-        random_hands, random_cards = TestHand._get_random_hands_with_opposing_card(17, plays)
-        for i, h in enumerate(random_hands):
-            c = random_cards[i]
-            play = h.get_low_straight(c, each_count, length)
-            if play:
-                if c:
-                    assert play.get_base_card() > c
-                cls._check_straight(play.cards, each_count)
-                cls._print_card_list(play, extra_msg="greater than {}".format(str(c)))
 
     def test_random_hand_straight_single(self):
         """tests get straight with random hands"""
         plays = 100
         each_count = 1
         length = 5
-        TestHand._run_random_hand_get_straights(plays, each_count, length)
+        TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
+                                  TestHand._check_straight, (each_count, ))
+
 
     def test_random_hand_straight_double(self):
         """tests get straight with random hands"""
         plays = 200
         each_count = 2
         length = 3
-        TestHand._run_random_hand_get_straights(plays, each_count, length)
+        TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
+                                  TestHand._check_straight, (each_count, ))
 
     def test_random_hand_straight_triples(self):
         """tests get straight with random hands"""
         plays = 1000
         each_count = 3
         length = 2
-        TestHand._run_random_hand_get_straights(plays, each_count, length)
+        TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
+                                  TestHand._check_straight, (each_count, ))
 
     """
     RANDOM GET_LOW_ADJ_TRIPLE()
     """
 
-    @classmethod
-    def _run_random_hand_get_adj_triples(cls, plays, extra):
-        """runs [plays] number of tests on random hands for get_low()"""
-        random_hands, random_cards = TestHand._get_random_hands_with_opposing_card(17, plays)
-        for i, h in enumerate(random_hands):
-            c = random_cards[i]
-            play = h.get_low_adj_triple(c, extra)
-            if play:
-                if c:
-                    assert play.get_base_card() > c
-                cls._check_adj_triple(play.cards, extra)
-                cls._print_card_list(play, extra_msg="greater than {}".format(str(c)))
-
     def test_random_hand_adj_triple_alone(self):
         """tests get low adj triple with random hands"""
         plays = 1000
-        extra = 0
-        TestHand._run_random_hand_get_adj_triples(plays, extra)
+        extra = (0, )
+        TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
     def test_random_hand_adj_triple_single(self):
         """tests get low adj triple with random hands"""
         plays = 1000
-        extra = 2
-        TestHand._run_random_hand_get_adj_triples(plays, extra)
+        extra = (2, )
+        TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
     def test_random_hand_adj_triple_double(self):
         """tests get low adj triple with random hands"""
         plays = 1000
-        extra = 4
-        TestHand._run_random_hand_get_adj_triples(plays, extra)
+        extra = (4, )
+        TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
     """
     RANDOM GET_LOW_WILDS
     """
 
-    @classmethod
-    def _run_random_hand_get_wilds(cls, plays):
-        """runs [plays] number of tests on random hands for get_low()"""
-        random_hands, random_cards = TestHand._get_random_hands_with_opposing_card(17, plays)
-        for i, h in enumerate(random_hands):
-            c = random_cards[i]
-            play = h.get_low_wild(c)
-            if play:
-                if c and c.value < SMALL_JOKER_VALUE:
-                    assert play.get_base_card() > c
-                cls._check_wild(play.cards)
-                cls._print_card_list(play, extra_msg="greater than {}".format(str(c)))
-
     def test_random_hand_wilds(self):
         """runs get wilds with random hands"""
         plays = 1000
-        TestHand._run_random_hand_get_wilds(plays)
+        TestHand._run_random_hand(plays, hand.Hand.get_low_wild, (), TestHand._check_wild, ())
+
+    """
+    TODO: TEST PLAYER GET LEAD PLAYS
+    """

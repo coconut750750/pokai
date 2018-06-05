@@ -48,10 +48,7 @@ class Hand(object):
             if not value in counts:
                 continue
             card_group = counts[value]
-            cg_len = len(card_group)
-            for i in range(4):
-                if cg_len == i + 1:
-                    self._categories[CATEGORIES[i]].append(card_group[:i+1])
+            self._categories[CATEGORIES[len(card_group) - 1]].append(card_group)
 
             self._organize_adj_triples(counts, value)
 
@@ -69,11 +66,11 @@ class Hand(object):
         for i in range(2):
             last_visited = -1
             for value in range(MIN_VALUE, MAX_VALUE + 1):
-                if not value in counts:
-                    continue
-
                 if value <= last_visited:
                     continue
+                if not value in counts:
+                    continue
+                
                 straight_group = []
                 # make sure value is Ace or less
                 while value in counts and value <= STRAIGHT_TERMINAL_VAL and len(counts[value]) > i:
@@ -87,49 +84,6 @@ class Hand(object):
         """helper function that organizes jokers"""
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
             self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
-
-    def _get_extras(self, num_extra, each_count=0):
-        """
-        Returns the extras for lead plays if any are required
-        """
-        if each_count == 1 or not each_count:
-            if self._categories[SINGLES]:
-                if num_extra == 1:
-                    return self._categories[SINGLES][0]
-                elif num_extra == 2 and len(self._categories[SINGLES]) >= 2:
-                    return self._categories[SINGLES][1]
-        elif each_count == 2 or not each_count:
-            if self._categories[DOUBLES]:
-                if num_extra == 1:
-                    return self._categories[DOUBLES][0]
-                elif num_extra == 2 and len(self._categories[DOUBLES]) >= 2:
-                    return self._categories[DOUBLES][1]
-        return []
-
-    def get_lead_play(self):
-        """
-        Gets the best play if this player is starting.
-        Returns lead play with pos of -1 or None
-        """
-        # changes this to get_low() s
-        for play_type in ORDER:
-            play = []
-            num_extra = 0
-            if not self._categories[play_type]:
-                continue
-            else:
-                play += self._categories[play_type][0]
-                # need to check triples because there is possibility of adding on extra cards
-                if ADJ_TRIPLES in play_type:
-                    extra = self._get_extras(2)
-                    play += extra
-                    num_extra = len(extra)
-                elif TRIPLES in play_type:
-                    extra = self._get_extras(1)
-                    play += extra
-                    num_extra = len(extra)
-                return Play(-1, play, num_extra, play_type)
-        return None
 
     def get_low(self, other_card, each_count, extra=0):
         """
@@ -160,12 +114,13 @@ class Hand(object):
             else:
                 extra_cards = extra_play1.cards + extra_play2.cards
 
+        play_type = CATEGORIES[each_count - 1]
         if each_count <= 4:
-            for card_group in self._categories[CATEGORIES[each_count - 1]]:
+            for card_group in self._categories[play_type]:
                 card = card_group[0]
                 if not other_card or card.value > other_card.value:
                     return Play(-1, card_group + extra_cards,
-                                len(extra_cards), CATEGORIES[each_count - 1])
+                                len(extra_cards), play_type)
 
         return None
 
@@ -197,11 +152,11 @@ class Hand(object):
         each_count -- if its a single, double, or triple straight
         length -- length of the opposing straight
                   length is ignored when other_card is None
+
         Returns play with pos of -1 or None
         """
         play_type = CATEGORIES[4 + each_count - 1]
-        if length < SMALLEST_STRAIGHT[each_count - 1]:
-            return None
+
         if not other_card:
             if self._categories[play_type]:
                 return Play(-1, self._categories[play_type][0], 0, play_type)

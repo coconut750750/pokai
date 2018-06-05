@@ -63,7 +63,7 @@ class Player(object):
             # double_straights, and adj_triples
             if not next_play and in_game_hands[prev_play.position].num_cards() <= 5 * self.hand.get_num_wild():
                 if prev_play.play_type != SINGLES and prev_play.play_type != DOUBLES:
-                    next_play = self.hand.get_low_wild(prev_play.get_base_card())
+                    next_play = self.hand.get_low_wild(None)
 
         if next_play:
             self.hand.remove_cards(next_play.cards)

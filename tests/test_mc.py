@@ -3,7 +3,6 @@ Testing module for Monte Carlo simulations
 """
 
 import time
-import sys
 from pokai.src.monte_carlo import *
 import pokai.src.card as card
 import pokai.src.hand as hand
@@ -22,8 +21,8 @@ class TestMC(object):
                              'Kd', '5h', '2H', '5C', '0C', '0H', '4D', 'KH']
         cls.card_strs_lv2 = ['3h', '4s', '4h', '5d', '6s', '7c', '9h', '9d', 'jh',
                              'jc', 'ks', 'kd', 'ac', 'ah', '2c', '2d']
-        cls.card_strs_lv3 = ['8s', '4h', '5d', '6c', '7s', '9s', '9c', '9d', '9h',
-                             '0d', 'Jh', 'Qh', 'Ks', 'Ac', '2h', 'Z1', 'Z0']
+        cls.card_strs_lv3 = ['3s', '4h', '5d', '6c', '7s', '9s', '9c', '9d', '9h',
+                             '0d', 'Jh', 'Qh', 'Ks', 'As', 'Ah', '2h', '2c']
         cls.card_strs_lv4 = ['Z1', 'Z0', '2H', '2S', '2D', '2C', 'AS', 'AD', 'AH',
                              'AC', 'KH', 'KS', 'KD', 'KC', 'QH', 'QD', 'QS']
 

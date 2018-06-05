@@ -2,8 +2,6 @@
 Probability test module
 """
 
-import sys
-sys.path.append('../')
 import time
 from itertools import combinations
 from pokai.src.probabilities import prob_of_doubles, percent

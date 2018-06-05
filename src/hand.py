@@ -225,14 +225,17 @@ class Hand(object):
                        4 if it carries 2 doubles
         Returns play with pos of -1 or None
         """
-        extra_cards = int(extra_cards / 2)
+        extra_cards = extra_cards // 2
         foundation = self.get_low_straight(other_card, 3, 2)
-        extra1 = self.get_low(None, extra_cards)
-        extra2 = self.get_second_low(None, extra_cards)
-        if not foundation or not extra1 or not extra2:
-            return None
-        # need to get second low
-        return Play(-1, foundation.cards + extra1.cards + extra2.cards, extra_cards, ADJ_TRIPLES)
+        if not foundation:
+            return
+        if extra_cards:
+            extra1 = self.get_low(None, extra_cards)
+            extra2 = self.get_second_low(None, extra_cards)
+            if not extra1 or not extra2:
+                return None
+            return Play(-1, foundation.cards + extra1.cards + extra2.cards, extra_cards, ADJ_TRIPLES)
+        return Play(-1, foundation.cards, 0, ADJ_TRIPLES)
 
     def get_low_wild(self, other_card):
         """

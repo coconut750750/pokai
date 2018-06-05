@@ -25,6 +25,10 @@ class Play(object):
         """Returns number of cards in play"""
         return len(self.cards) - self.num_extra
 
+    def num_cards(self):
+        """returns total number of cards"""
+        return len(self.cards)
+
     def get_base_card(self):
         """Returns the base card of this play (the card another player needs to beat)"""
         return self.cards[0]

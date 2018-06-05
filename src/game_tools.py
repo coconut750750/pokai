@@ -16,6 +16,7 @@ TRIPLES = 'triples'
 QUADRUPLES = 'fours'
 STRAIGHTS = 'straights'
 DOUBLE_STRAIGHTS = 'double_straights'
+TRIPLE_STRAIGHTS = 'triple_straights'
 ADJ_TRIPLES = 'adj_triples'
 DOUBLE_JOKER = 'double_joker'
 

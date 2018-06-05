@@ -63,7 +63,7 @@ class TestMC(object):
     def test_simulate_multiple_lv2(self):
         """tests simulation on level 2 hand"""
         plays = 100
-        print(simulate(self.test_hand_lv2, plays, 17, [], display=True) / plays)
+        print(simulate(self.test_hand_lv2, plays, 17, []) / plays)
 
     def test_simulate_multiple_lv3(self):
         """tests simulation on level 3 hand"""

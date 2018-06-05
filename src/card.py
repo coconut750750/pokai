@@ -16,6 +16,28 @@ class Card(object):
     """
     The Card Object
     """
+    @staticmethod
+    def str_to_card(card_str):
+        """
+        returns a cards with value of card_str
+        """
+        name = card_str[0].upper()
+        if name == 'Z':
+            suit = int(card_str[1])
+        else:
+            suit = card_str[1].lower()
+        return Card(str(name), suit)
+
+    @staticmethod
+    def strs_to_cards(card_strs):
+        """
+        returns a list of cards with value of card_strs
+        """
+        card_list = []
+        for card_str in card_strs:
+            card_list.append(Card.str_to_card(card_str))
+        return card_list
+
     def __init__(self, name, suit):
         super(Card, self).__init__()
         self.display = 'INVALID'

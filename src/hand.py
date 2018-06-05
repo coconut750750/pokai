@@ -5,14 +5,16 @@ Contains the Hand class and other constants
 
 from itertools import groupby
 from pokai.src.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
-from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+                                 DOUBLE_STRAIGHTS,TRIPLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from pokai.src.card_play import Play
 
 STRAIGHT_TERMINAL_VAL = 11
 SMALLEST_STRAIGHT = [5, 3, 2]
 CATEGORIES = [SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS,
               ADJ_TRIPLES, DOUBLE_JOKER]
-ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER]
+ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
+         DOUBLE_JOKER]
 WILDS = [DOUBLE_JOKER, QUADRUPLES]
 
 class Hand(object):
@@ -35,21 +37,32 @@ class Hand(object):
     def _organize(self):
         """Organizes the cards in categories"""
         self._categories = {x:[] for x in CATEGORIES}
-        # {card_value_int : [card1, card2]}
         counts = {value : list(c) for value, c in groupby(self._cards, lambda card: card.value)}
+        self._organize_basics(counts)
+        self._organize_straights(counts)
+        self._organize_jokers(counts)
+
+    def _organize_basics(self, counts):
+        """helper function that organizes singles, doubles, triples, and quadruples"""
         for value in range(MIN_VALUE, MAX_VALUE + 1):
             if not value in counts:
                 continue
             card_group = counts[value]
             cg_len = len(card_group)
             for i in range(4):
-                if cg_len >= i + 1:
+                if cg_len == i + 1:
                     self._categories[CATEGORIES[i]].append(card_group[:i+1])
 
             self._organize_adj_triples(counts, value)
-        self._organize_straights(counts)
-        if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
-            self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
+
+    def _organize_adj_triples(self, counts, value):
+        """helper function that organizes adj triples that start
+        at value"""
+        if (value + 1) not in counts:
+            return
+        if len(counts[value]) == 3 and len(counts[value + 1]) == 3:
+            pair = counts[value] + counts[value + 1]
+            self._categories[ADJ_TRIPLES].append(pair)
 
     def _organize_straights(self, counts):
         """helper function that organizes straights"""
@@ -70,14 +83,28 @@ class Hand(object):
                     self._categories[CATEGORIES[4 + i]].append(straight_group)
                     last_visited = value - 1
 
-    def _organize_adj_triples(self, counts, value):
-        """helper function that organizes adj triples that start
-        at value"""
-        if (value + 1) not in counts:
-            return
-        if len(counts[value]) == 3 and len(counts[value + 1]) == 3:
-            pair = counts[value] + counts[value + 1]
-            self._categories[ADJ_TRIPLES].append(pair)
+    def _organize_jokers(self, counts):
+        """helper function that organizes jokers"""
+        if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
+            self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
+
+    def _get_extras(self, num_extra, each_count=0):
+        """
+        Returns the extras for lead plays if any are required
+        """
+        if each_count == 1 or not each_count:
+            if self._categories[SINGLES]:
+                if num_extra == 1:
+                    return self._categories[SINGLES][0]
+                elif num_extra == 2 and len(self._categories[SINGLES]) >= 2:
+                    return self._categories[SINGLES][1]
+        elif each_count == 2 or not each_count:
+            if self._categories[DOUBLES]:
+                if num_extra == 1:
+                    return self._categories[DOUBLES][0]
+                elif num_extra == 2 and len(self._categories[DOUBLES]) >= 2:
+                    return self._categories[DOUBLES][1]
+        return []
 
     def get_lead_play(self):
         """
@@ -92,33 +119,23 @@ class Hand(object):
                 continue
             else:
                 play += self._categories[play_type][0]
-                # need to check triples because there is possibility of adding
-                # on extra cards
-                if TRIPLES in play_type:
-                    if len(self._categories[SINGLES]) >= 1:
-                        play += self._categories[SINGLES][0]
-                        num_extra += 1
-                        if play_type == ADJ_TRIPLES:
-                            if len(self._categories[SINGLES]) < 2:
-                                continue
-                            play += self._categories[SINGLES][1]
-                            num_extra += 1
-                    elif len(self._categories[DOUBLES]) >= 1:
-                        play += self._categories[DOUBLES][0]
-                        num_extra += 1
-                        if play_type == ADJ_TRIPLES:
-                            if len(self._categories[DOUBLES]) < 2:
-                                continue
-                            play += self._categories[DOUBLES][1]
-                            num_extra += 1
+                # need to check triples because there is possibility of adding on extra cards
+                if ADJ_TRIPLES in play_type:
+                    extra = self._get_extras(2)
+                    play += extra
+                    num_extra = len(extra)
+                elif TRIPLES in play_type:
+                    extra = self._get_extras(1)
+                    play += extra
+                    num_extra = len(extra)
                 return Play(-1, play, num_extra, play_type)
         return None
 
     def get_low(self, other_card, each_count, extra=0):
         """
-        Gets the lowest single that meets the properties
+        Gets the lowest basic that meets the properties
         Arguments:
-        other_card -- lowest card in the single
+        other_card -- lowest card in the basic
         each_count -- if its a single, double, triple, or quad (wild)
         extra -- the number of extra cards (1 or 2 for triple)
                                            (2 or 4 for quad)
@@ -128,23 +145,20 @@ class Hand(object):
             extra = 0
 
         extra_cards = []
-        if extra == 1 and not self._categories[SINGLES]:
-            return None
-        elif extra == 1:
-            extra_cards += self._categories[SINGLES][0]
-        if extra == 2:
-            if each_count == 3 and not self._categories[DOUBLES]:
-                return None
-            elif each_count == 3:
-                extra_cards += self._categories[DOUBLES][0]
-            if each_count == 4 and len(self._categories[SINGLES]) < 2:
-                return None
-            elif each_count == 4:
-                extra_cards += self._categories[SINGLES][0:2]
-        if extra == 4 and len(self._categories[DOUBLES]) < 2:
-            return None
-        elif extra == 4:
-            extra_cards += self._categories[DOUBLES][0:2]
+        if each_count == 3 and extra:
+            extra_play = self.get_low(None, extra)
+            if not extra_play:
+                return
+            else:
+                extra_cards = extra_play.cards
+
+        if each_count == 4 and extra:
+            extra_play1 = self.get_low(None, extra // 2)
+            extra_play2 = self.get_second_low(None, extra // 2)
+            if not extra_play1 or not extra_play2:
+                return
+            else:
+                extra_cards = extra_play1.cards + extra_play2.cards
 
         if each_count <= 4:
             for card_group in self._categories[CATEGORIES[each_count - 1]]:
@@ -157,9 +171,9 @@ class Hand(object):
 
     def get_second_low(self, other_card, each_count, extra=0):
         """
-        Gets the second lowest single that meets the properties
+        Gets the second lowest basic that meets the properties
         Arguments:
-        other_card -- lowest card in the single
+        other_card -- lowest card in the basic
         each_count -- if its a single, double, triple, or quad (wild)
         extra -- the number of extra cards (1 or 2 for triple)
                                            (2 or 4 for quad)
@@ -247,12 +261,7 @@ class Hand(object):
         for c in cards:
             self._add(c)
         for card_str in card_strs:
-            name = card_str[0].upper()
-            if name == 'Z':
-                suit = int(card_str[1])
-            else:
-                suit = card_str[1].lower()
-            self._add(Card(str(name), suit))
+            self._add(Card.str_to_card(card_str))
         self._sort_cards()
         self._organize()
 
@@ -301,7 +310,7 @@ class Hand(object):
     def __eq__(self, other):
         """equality function"""
         for c in self._cards:
-            if c not in other._cards:
+            if c not in other.get_cards():
                 return False
         return True
 

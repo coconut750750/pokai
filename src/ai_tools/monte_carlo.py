@@ -5,30 +5,18 @@ Provides functionality to estimate hand and play strength
 import multiprocessing
 import copy
 from random import randint
-import pokai.src.game_tools as game_tools
-from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
-from pokai.src.hand import Hand
-from pokai.src.player import Player
-from pokai.src.aiplayer import AIPlayer
+import pokai.src.game.game_tools as game_tools
+from pokai.src.game.game_tools import *
+from pokai.src.game.hand import Hand
+from pokai.src.game.player import Player
+from pokai.src.game.aiplayer import AIPlayer
 
 SIMULATIONS = 1000
 
-def _game_over(hands):
-    """
-    Returns if the game is over
-    """
-    ended = False
-    for h in hands:
-        ended = ended or h.num_cards() == 0
-    return ended
-
-
-def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
+def simulate_one_game(hands, start_pos, used_cards, display):
     """
     Simulates 1 game with:
-    hand -- starting hand
-    hand1 -- opponent 1's hand
-    hand2 -- opponent 2's hand
+    hands -- list of hands where starting hand is at index 0
     start_pos -- player that starts
     used_cards -- list of used cards
     display -- print out results if True
@@ -37,21 +25,22 @@ def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
     Returns if hand wins the game
     """
     if display:
-        print("Player 0:", hand)
-        print("Player 1:", hand1)
-        print("Player 2:", hand2)
+        print("Player 0:", hands[0])
+        print("Player 1:", hands[1])
+        print("Player 2:", hands[2])
         print("simulation start")
 
-    hands = [hand, hand1, hand2]
     players = [Player(hands[0], 0, ""), Player(hands[1], 1, ""), Player(hands[2], 2, "")]
 
     turn = start_pos
     prev_play = None
 
-    while not _game_over(hands):
-        next_play = players[turn].get_play(prev_play, hands, used_cards)
+    while not game_is_over(hands):
+        hand_counts = [hand.num_cards() for hand in hands]
+        next_play = players[turn].get_play(prev_play, hand_counts, used_cards)
 
         if next_play:
+            players[turn].hand.remove_cards(next_play.cards)
             if display:
                 print(next_play)
             if next_play.play_type == DOUBLE_JOKER:
@@ -59,15 +48,10 @@ def simulate_one_game(hand, hand1, hand2, start_pos, used_cards, display):
             else:
                 prev_play = next_play
 
-        if prev_play and prev_play.play_type != DOUBLE_JOKER:
+        if prev_play:
             turn = (turn + 1) % game_tools.NUM_PLAYERS
 
-        # if display:
-        #     print("Player 0:", hand)
-        #     print("Player 1:", hand1)
-        #     print("Player 2:", hand2)
-
-    return hand.num_cards() == 0
+    return hands[0].num_cards() == 0
 
 def simulate_one_random_game(hand, n_cards1, used_cards, display):
     """
@@ -87,7 +71,7 @@ def simulate_one_random_game(hand, n_cards1, used_cards, display):
     hand1 = Hand(deck[0: n_cards1])
     hand2 = Hand(deck[n_cards1:])
 
-    return simulate_one_game(hand, hand1, hand2, randint(0, 2), used_cards, display)
+    return simulate_one_game([hand, hand1, hand2], randint(0, 2), used_cards, display)
 
 def simulate(hand, n_games, n_cards1, used_cards, display=False):
     """
@@ -109,7 +93,7 @@ def simulate(hand, n_games, n_cards1, used_cards, display=False):
 
     return wins
 
-def simulation_worker(index, hand, n_games, n_cards1, used_cards, return_list):
+def _simulation_worker(index, hand, n_games, n_cards1, used_cards, return_list):
     """
     Worker for multiprocessed simulation
     index -- index of the worker and where to store the data
@@ -122,7 +106,7 @@ def simulation_worker(index, hand, n_games, n_cards1, used_cards, return_list):
     """
     return_list[index] = simulate(hand, n_games, n_cards1, used_cards)
 
-def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_threads):
+def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_processes):
     """
     Simulates n games but uses multiple processes
     hand -- starting hand
@@ -130,18 +114,18 @@ def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_threads):
     n_cards1 -- number of cards in opponent 1's hand
                 number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
     used_cards -- list of revealed cards
-    n_threads -- number of processes
+    n_processes -- number of processes
     Returns number of wins
     """
     manager = multiprocessing.Manager()
-    return_list = manager.list([0] * n_threads)
+    return_list = manager.list([0] * n_processes)
 
     processes = []
-    sim_per_process = int(n_games / n_threads)
+    sim_per_process = int(n_games / n_processes)
 
-    for i in range(n_threads):
+    for i in range(n_processes):
         sim_args = (i, hand, sim_per_process, n_cards1, used_cards, return_list)
-        p = multiprocessing.Process(target=simulation_worker, args=sim_args)
+        p = multiprocessing.Process(target=_simulation_worker, args=sim_args)
         processes.append(p)
         p.start()
 

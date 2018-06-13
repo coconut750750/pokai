@@ -4,17 +4,15 @@ Contains the Hand class and other constants
 """
 
 from itertools import groupby
-from pokai.src.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
-from pokai.src.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
-                                 DOUBLE_STRAIGHTS,TRIPLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
-from pokai.src.card_play import Play
+from pokai.src.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
+from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+                                      DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from pokai.src.game.card_play import Play
 
 STRAIGHT_TERMINAL_VAL = 11
 SMALLEST_STRAIGHT = [5, 3, 2]
 CATEGORIES = [SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS, DOUBLE_STRAIGHTS,
               ADJ_TRIPLES, DOUBLE_JOKER]
-ORDER = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
-         DOUBLE_JOKER]
 WILDS = [DOUBLE_JOKER, QUADRUPLES]
 
 class Hand(object):
@@ -120,7 +118,7 @@ class Hand(object):
                 card = card_group[0]
                 if not other_card or card.value > other_card.value:
                     return Play(-1, card_group + extra_cards,
-                                len(extra_cards), play_type)
+                                len(extra_cards), play_type=play_type)
 
         return None
 
@@ -141,7 +139,7 @@ class Hand(object):
         second_low = self.get_low(other_card, each_count, extra=extra)
         self.add_cards(first_low.cards)
         if second_low:
-            return Play(-1, second_low.cards, extra, CATEGORIES[each_count - 1])
+            return Play(-1, second_low.cards, extra, play_type=CATEGORIES[each_count - 1])
         return None
 
     def get_low_straight(self, other_card, each_count, length):
@@ -159,16 +157,16 @@ class Hand(object):
 
         if not other_card:
             if self._categories[play_type]:
-                return Play(-1, self._categories[play_type][0], 0, play_type)
+                return Play(-1, self._categories[play_type][0], 0, play_type=play_type)
             return None
         for card_group in self._categories[play_type]:
             # although first card is less, might be able to just take the top portion of the straight
             if card_group[0].value <= other_card.value:
                 for i, c in enumerate(card_group):
                     if c.value > other_card.value and len(card_group) - i >= length * each_count:
-                        return Play(-1, card_group[i: i + length * each_count], 0, play_type)
+                        return Play(-1, card_group[i: i + length * each_count], 0, play_type=play_type)
             elif len(card_group) >= length * each_count:
-                return Play(-1, card_group[0: length * each_count], 0, play_type)
+                return Play(-1, card_group[0: length * each_count], 0, play_type=play_type)
         return None
 
     def get_low_adj_triple(self, other_card, extra_cards):
@@ -189,8 +187,8 @@ class Hand(object):
             extra2 = self.get_second_low(None, extra_cards)
             if not extra1 or not extra2:
                 return None
-            return Play(-1, foundation.cards + extra1.cards + extra2.cards, extra_cards, ADJ_TRIPLES)
-        return Play(-1, foundation.cards, 0, ADJ_TRIPLES)
+            return Play(-1, foundation.cards + extra1.cards + extra2.cards, extra_cards, play_type=ADJ_TRIPLES)
+        return Play(-1, foundation.cards, 0, play_type=ADJ_TRIPLES)
 
     def get_low_wild(self, other_card):
         """
@@ -199,9 +197,9 @@ class Hand(object):
         """
         lowest_four = self.get_low(other_card, 4)
         if lowest_four:
-            return Play(-1, lowest_four.cards, 0, QUADRUPLES)
+            return Play(-1, lowest_four.cards, 0, play_type=QUADRUPLES)
         if self._categories[DOUBLE_JOKER]:
-            return Play(-1, self._categories[DOUBLE_JOKER][0], 0, DOUBLE_JOKER)
+            return Play(-1, self._categories[DOUBLE_JOKER][0], 0, play_type=DOUBLE_JOKER)
         return None
 
     def get_num_wild(self):

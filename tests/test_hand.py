@@ -10,10 +10,14 @@ pytest test_card.py -vs
 
 import copy
 import random
-import pokai.src.card as card
-from pokai.src.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
-import pokai.src.hand as hand
-from pokai.src.game_tools import get_new_shuffled_deck, DOUBLE_JOKER
+import pokai.src.game.card as card
+from pokai.src.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+import pokai.src.game.hand as hand
+from pokai.src.game.game_tools import get_new_shuffled_deck, DOUBLE_JOKER
+
+# if you want to run more random tests, increase
+TEST_MULTIPLIER = 1
+
 
 class TestHand(object):
     """
@@ -54,8 +58,8 @@ class TestHand(object):
         """prints out a list of cards with a message"""
         if extra_msg:
             extra_msg = "({})".format(extra_msg)
-        print("\nValid {} {}: {}".format(card_play.play_type, 
-                                         extra_msg, 
+        print("\nValid {} {}: {}".format(card_play.play_type,
+                                         extra_msg,
                                          " ".join(str(c) for c in card_play.cards)))
 
     @staticmethod
@@ -101,9 +105,9 @@ class TestHand(object):
         assert adj_trip[first].value != adj_trip[second].value
 
         assert adj_trip[0].value != adj_trip[first].value\
-               and adj_trip[0].value != adj_trip[second].value
+            and adj_trip[0].value != adj_trip[second].value
         assert adj_trip[3].value != adj_trip[first].value\
-               and adj_trip[3].value != adj_trip[second].value
+            and adj_trip[3].value != adj_trip[second].value
 
     @staticmethod
     def _check_quadruples(quad):
@@ -112,8 +116,8 @@ class TestHand(object):
         l = len(quad)
         assert l == 4 or l == 6 or l == 8
         assert quad[0].value == quad[1].value and\
-               quad[0].value == quad[2].value and\
-               quad[0].value == quad[3].value
+            quad[0].value == quad[2].value and\
+            quad[0].value == quad[3].value
         if l == 6:
             assert quad[4].value != quad[5].value
             assert quad[0].value != quad[4].value
@@ -331,7 +335,7 @@ class TestHand(object):
         first_low = first_low_cards.get_base_card()
         play = self.hand.get_second_low(c, each_count)
         TestHand._check_single(play.cards)
-        assert initial == self.hand # hand shouldn't change
+        assert initial == self.hand  # hand shouldn't change
         assert play.get_base_card() > c
         assert play.get_base_card() >= first_low
 
@@ -354,7 +358,7 @@ class TestHand(object):
         first_low_cards = self.hand.get_low(c, each_count)
         first_low = first_low_cards.get_base_card()
         play = self.hand.get_second_low(c, each_count)
-        assert initial == str(self.hand) # hand shouldn't change
+        assert initial == str(self.hand)  # hand shouldn't change
         assert play.get_base_card() > c
         assert play.get_base_card() >= first_low
         TestHand._check_double(play.cards)
@@ -460,7 +464,6 @@ class TestHand(object):
         c = card.Card('7', 'h')
         assert not self.hand.get_low_wild(c)
 
-
     """
     GET NONE LOWS
     """
@@ -522,7 +525,7 @@ class TestHand(object):
         assert play
         second_low_cards = play.cards
         assert first_low_cards and second_low_cards
-        assert initial == self.hand # hand shouldn't change
+        assert initial == self.hand  # hand shouldn't change
         assert len(second_low_cards) == 1
         assert second_low_cards[0] >= first_low_cards[0]
         TestHand._print_card_list(play, extra_msg="second low")
@@ -635,21 +638,21 @@ class TestHand(object):
 
     def test_random_hand_single(self):
         """tests get low single with random hands"""
-        plays = 100
+        plays = TEST_MULTIPLIER * 100
         each_count = 1
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, ),
                                   TestHand._check_single, ())
 
     def test_random_hand_doubles(self):
         """tests get low double with random hands"""
-        plays = 100
+        plays = TEST_MULTIPLIER * 100
         each_count = 2
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, ),
                                   TestHand._check_double, ())
 
     def test_random_hand_triple_alone(self):
         """tests get low triple with random hands"""
-        plays = 100
+        plays = TEST_MULTIPLIER * 100
         each_count = 3
         extra = 0
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
@@ -657,14 +660,15 @@ class TestHand(object):
 
     def test_random_hand_triple_single(self):
         """tests get low triple with random hands"""
-        plays = 200
+        plays = TEST_MULTIPLIER * 200
         each_count = 3
         extra = 1
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
                                   TestHand._check_triple, ())
+
     def test_random_hand_triple_double(self):
         """tests get low triple with random hands"""
-        plays = 300
+        plays = TEST_MULTIPLIER * 300
         each_count = 3
         extra = 2
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
@@ -672,7 +676,7 @@ class TestHand(object):
 
     def test_random_hand_quad_alone(self):
         """tests get low triple with random hands"""
-        plays = 400
+        plays = TEST_MULTIPLIER * 400
         each_count = 4
         extra = 0
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
@@ -680,7 +684,7 @@ class TestHand(object):
 
     def test_random_hand_quad_single(self):
         """tests get low triple with random hands"""
-        plays = 400
+        plays = TEST_MULTIPLIER * 400
         each_count = 4
         extra = 2
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
@@ -688,7 +692,7 @@ class TestHand(object):
 
     def test_random_hand_quad_double(self):
         """tests get low triple with random hands"""
-        plays = 400
+        plays = TEST_MULTIPLIER * 400
         each_count = 4
         extra = 4
         TestHand._run_random_hand(plays, hand.Hand.get_low, (each_count, extra),
@@ -700,16 +704,15 @@ class TestHand(object):
 
     def test_random_hand_straight_single(self):
         """tests get straight with random hands"""
-        plays = 100
+        plays = TEST_MULTIPLIER * 100
         each_count = 1
         length = 5
         TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
                                   TestHand._check_straight, (each_count, ))
 
-
     def test_random_hand_straight_double(self):
         """tests get straight with random hands"""
-        plays = 200
+        plays = TEST_MULTIPLIER * 200
         each_count = 2
         length = 3
         TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
@@ -717,7 +720,7 @@ class TestHand(object):
 
     def test_random_hand_straight_triples(self):
         """tests get straight with random hands"""
-        plays = 1000
+        plays = TEST_MULTIPLIER * 1000
         each_count = 3
         length = 2
         TestHand._run_random_hand(plays, hand.Hand.get_low_straight, (each_count, length),
@@ -729,19 +732,19 @@ class TestHand(object):
 
     def test_random_hand_adj_triple_alone(self):
         """tests get low adj triple with random hands"""
-        plays = 1000
+        plays = TEST_MULTIPLIER * 1000
         extra = (0, )
         TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
     def test_random_hand_adj_triple_single(self):
         """tests get low adj triple with random hands"""
-        plays = 1000
+        plays = TEST_MULTIPLIER * 1000
         extra = (2, )
         TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
     def test_random_hand_adj_triple_double(self):
         """tests get low adj triple with random hands"""
-        plays = 1000
+        plays = TEST_MULTIPLIER * 1000
         extra = (4, )
         TestHand._run_random_hand(plays, hand.Hand.get_low_adj_triple, extra, TestHand._check_adj_triple, extra)
 
@@ -751,7 +754,7 @@ class TestHand(object):
 
     def test_random_hand_wilds(self):
         """runs get wilds with random hands"""
-        plays = 1000
+        plays = TEST_MULTIPLIER * 1000
         TestHand._run_random_hand(plays, hand.Hand.get_low_wild, (), TestHand._check_wild, ())
 
     """

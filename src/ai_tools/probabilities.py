@@ -11,7 +11,7 @@ from pokai.src.game.game_tools import TOTAL_CARDS
 
 def percent(numerator, denominator):
     """return percentage based off of numberator and denominator"""
-    return int(numerator / denominator * 100) / 100
+    return int(numerator * 100 / denominator) / 100
 
 def choose(n, r):
     """
@@ -177,10 +177,28 @@ def _prob_of_quads(leftover_cards, n_cards1, base_val=-1):
     if not num_quads:
         return 0
 
-    num_ways_to_choose_quad = choose(num_quads, 1)
-    num_ways_to_choose_non_quads = choose(num_cards - 4, n_cards1 - 4)
+    num_not_quad = num_cards - 4 * num_quads
 
-    return num_ways_to_choose_quad * num_ways_to_choose_non_quads // total
+    num_ways_for_quad = 0
+    for i in range(1, num_quads + 1):
+        num_leftover_cards1 = n_cards1 - (4 * i)
+        num_leftover_quads = num_quads - i
+
+        num_cards_after_i_quads = num_cards - (4 * i)
+
+        num_ways_to_choose_i_quads = choose(num_quads, i)
+
+        if num_leftover_cards1 > 0:
+            num_ways_to_choose_non_quads_p1 = choose(num_cards_after_i_quads, num_leftover_cards1)
+        else:
+            num_ways_to_choose_non_quads_p1 = 0
+
+        if i & 2:
+            num_ways_to_choose_i_quads *= -1
+        print("bla", i, num_ways_to_choose_i_quads, (num_ways_to_choose_non_quads_p1))
+        num_ways_for_quad += num_ways_to_choose_i_quads * (num_ways_to_choose_non_quads_p1)
+
+    return percent(num_ways_for_quad, total)
 
 ##########  PROBABILITY FUNCTIONS END  ##########
 

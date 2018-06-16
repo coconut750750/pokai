@@ -207,9 +207,9 @@ class TestProbability(object):
         TestProbability._run_multiple_test_prob_of_occurance(loops, 3, n_total_cards,
                                                            n_cards1, base_val=base_val)
 
-    def test_prob_quad_simple(self):
-        """tests the probability of quads with simple inputs"""
-        card_strs = ['3s', '3h', '3d', '3c', '4s', '4h', '4d', '4c', '5c', '5s', '5d', '5h', '6s', '6h', '6c']
-        cards = Card.strs_to_cards(card_strs)
-        n_cards1 = 9
-        TestProbability._run_test_prob_of_occurance(cards, 4, n_cards1)
+    # def test_prob_quad_simple(self):
+    #     """tests the probability of quads with simple inputs"""
+    #     card_strs = ['3s', '3h', '3d', '3c', '4s', '4h', '4d', '4c', '5c', '5s', '5d', '5h', '6s', '6h', '6c']
+    #     cards = Card.strs_to_cards(card_strs)
+    #     n_cards1 = 9
+    #     TestProbability._run_test_prob_of_occurance(cards, 4, n_cards1)

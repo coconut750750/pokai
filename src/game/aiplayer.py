@@ -2,8 +2,8 @@
 AIPlayer module with AIPlayer class
 """
 
-from pokai.src.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
-from pokai.src.player import Player
+from pokai.src.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
+from pokai.src.game.player import Player
 
 class AIPlayer(Player):
 

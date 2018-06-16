@@ -3,9 +3,10 @@ Testing module for Monte Carlo simulations
 """
 
 import time
-from pokai.src.monte_carlo import *
-import pokai.src.card as card
-import pokai.src.hand as hand
+from pokai.src.ai_tools.monte_carlo import *
+import pokai.src.game.card as card
+import pokai.src.game.hand as hand
+
 
 class TestMC(object):
     """
@@ -45,10 +46,12 @@ class TestMC(object):
     def test_simulate_one(self):
         """tests one non random game"""
         test_hand2 = hand.Hand([])
-        test_hand2.add_cards(card_strs=['3d', '3s', '5c', '6h', '7h', '8h', '8d', '8s', '9c', '0s', '0d', 'js', 'Qh', 'Qs', 'Kc', '2h', 'Z1'])
+        test_hand2.add_cards(card_strs=['3d', '3s', '5c', '6h', '7h', '8h', '8d', '8s',
+                                        '9c', '0s', '0d', 'js', 'Qh', 'Qs', 'Kc', '2h', 'Z1'])
         test_hand3 = hand.Hand([])
-        test_hand3.add_cards(card_strs=['3c', '4c', '5h', '6d', '6c', '7s', '8c', '9s', '0c', '0h', 'Jd', 'Qc', 'Qd', 'Kh', 'As', '2s', 'Z0'])
-        simulate_one_game(self.test_hand_lv2, test_hand2, test_hand3, 0, [], False)
+        test_hand3.add_cards(card_strs=['3c', '4c', '5h', '6d', '6c', '7s', '8c', '9s',
+                                        '0c', '0h', 'Jd', 'Qc', 'Qd', 'Kh', 'As', '2s', 'Z0'])
+        simulate_one_game([self.test_hand_lv2, test_hand2, test_hand3], 0, [], False)
 
     def test_simulate_one_random(self):
         """tests the simulation of one game"""

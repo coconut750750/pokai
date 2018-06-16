@@ -7,8 +7,8 @@ pytest test_card.py -vs
 -v : verbose
 -s : switch (allows printing)
 """
-
-import pokai.src.card as card
+import os
+import pokai.src.game.card as card
 
 class TestCard(object):
     """

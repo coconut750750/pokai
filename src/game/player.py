@@ -2,8 +2,9 @@
 Player module with Player class
 """
 
-from pokai.src.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
-
+from pokai.src.game.hand import Hand
+from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+                                      DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 class Player(object):
     """docstring for Player"""
     def __init__(self, hand, position, t):
@@ -20,65 +21,56 @@ class Player(object):
     def info(self):
         self.hand.print_categories()
 
-    def get_lead_play(self, in_game_hands, used_cards):
+    def _get_lead_play(self, hand_counts, unrevealed_cards):
         """
         Gets the best play if this player is starting.
         Returns lead play
         """
-        next_play = None
-
         for play_type in self.order:
+            next_play = None
             if play_type == SINGLES:
                 next_play = self.hand.get_low(None, 1)
             elif play_type == DOUBLES:
                 next_play = self.hand.get_low(None, 2)
             elif play_type == TRIPLES:
-                next_play = self._get_lead_triple(in_game_hands, used_cards)
+                next_play = self._get_lead_triple(hand_counts, unrevealed_cards)
             elif play_type == STRAIGHTS:
-                next_play = self._get_lead_straight(1, in_game_hands, used_cards)
+                next_play = self._get_lead_straight(1, hand_counts, unrevealed_cards)
             elif play_type == DOUBLE_STRAIGHTS:
-                next_play = self._get_lead_straight(2, in_game_hands, used_cards)
+                next_play = self._get_lead_straight(2, hand_counts, unrevealed_cards)
             elif play_type == ADJ_TRIPLES:
-                next_play = self._get_lead_adj_triples(in_game_hands, used_cards)
+                next_play = self._get_lead_adj_triples(hand_counts, unrevealed_cards)
             else: # play_type == QUADRUPLES or DOUBLE_JOKER:
                 next_play = self.hand.get_low_wild(None)
 
             if next_play:
-                next_play.position = self.position
                 return next_play
         return None
 
-    def _get_lead_triple(self, in_game_hands, used_cards):
+    def _get_lead_triple(self, hand_counts, unrevealed_cards):
         for i in [2, 1, 0]:
             next_play = self.hand.get_low(None, 3, i)
             if next_play:
                 return next_play
         return None
 
-    def _get_lead_adj_triples(self, in_game_hands, used_cards):
+    def _get_lead_adj_triples(self, hand_counts, unrevealed_cards):
         for i in [2, 4, 0]:
             next_play = self.hand.get_low_adj_triple(None, i)
             if next_play:
                 return next_play
         return None
 
-    def _get_lead_straight(self, each_count, in_game_hands, used_cards):
-        next_play = self.hand.get_low_straight(None, each_count, -1)
-        return next_play
+    def _get_lead_straight(self, each_count, hand_counts, unrevealed_cards):
+        return self.hand.get_low_straight(None, each_count, -1)
 
-    def play(self, cards):
-        self.hand.remove_cards(cards)
-        for c in cards:
-            print(c, end=" ")
-        print()
-
-    def get_play(self, prev_play, in_game_hands, used_cards):
+    def get_play(self, prev_play, hand_counts, unrevealed_cards):
         """
         Returns lowest play of play_type
         """
         if not prev_play or prev_play.position == self.position:
             # lead play
-            next_play = self.get_lead_play(in_game_hands, used_cards)
+            next_play = self._get_lead_play(hand_counts, unrevealed_cards)
         else:
             if prev_play.play_type == SINGLES:
                 next_play = self.hand.get_low(prev_play.get_base_card(), 1)
@@ -102,14 +94,20 @@ class Player(object):
             # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
             # check if any wilds and play wilds only if triples, straights,
             # double_straights, and adj_triples
-            if not next_play and in_game_hands[prev_play.position].num_cards() <= 5 * self.hand.get_num_wild():
+            if not next_play and hand_counts[prev_play.position] <= 5 * self.hand.get_num_wild():
                 if prev_play.play_type != SINGLES and prev_play.play_type != DOUBLES:
                     next_play = self.hand.get_low_wild(None)
 
         if next_play:
-            self.hand.remove_cards(next_play.cards)
             next_play.position = self.position
         return next_play
+
+    def play(self, card_play):
+        self.hand.remove_cards(card_play.cards)
+        print("{}".format(card_play.play_type))
+        for c in card_play.cards:
+            print(c, end=" ")
+        print()
 
     def amount(self):
         return self.hand.num_cards()

@@ -28,6 +28,7 @@ class GameState(object):
         self.used_cards += card_play.cards
         self.unused_cards = remove_from_deck(self.unused_cards, card_play.cards)
         self.prev_play = card_play
+        self.increment_turn()
 
     def increment_turn(self):
         """

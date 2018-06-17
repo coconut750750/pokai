@@ -13,10 +13,10 @@ from pokai.src.game.aiplayer import AIPlayer
 
 SIMULATIONS = 1000
 
-def simulate_one_game(hands, start_pos, used_cards, display):
+def simulate_one_game(players, start_pos, used_cards, display, prev_play=None):
     """
     Simulates 1 game with:
-    hands -- list of hands where starting hand is at index 0
+    players -- list of players where starting hand is at index 0
     start_pos -- player that starts
     used_cards -- list of used cards
     display -- print out results if True
@@ -25,22 +25,19 @@ def simulate_one_game(hands, start_pos, used_cards, display):
     Returns if hand wins the game
     """
     if display:
-        print("Player 0:", hands[0])
-        print("Player 1:", hands[1])
-        print("Player 2:", hands[2])
+        print("Player 0:", players[0].hand)
+        print("Player 1:", players[1].hand)
+        print("Player 2:", players[2].hand)
         print("simulation start")
 
-    players = [Player(hands[0], 0, ""), Player(hands[1], 1, ""), Player(hands[2], 2, "")]
-
     turn = start_pos
-    prev_play = None
 
-    while not game_is_over(hands):
-        hand_counts = [hand.num_cards() for hand in hands]
+    while not game_is_over(players):
+        hand_counts = [p.amount() for p in players]
         next_play = players[turn].get_play(prev_play, hand_counts, used_cards)
 
         if next_play:
-            players[turn].hand.remove_cards(next_play.cards)
+            players[turn].play(next_play)
             if display:
                 print(next_play)
             if next_play.play_type == DOUBLE_JOKER:
@@ -51,69 +48,62 @@ def simulate_one_game(hands, start_pos, used_cards, display):
         if prev_play:
             turn = (turn + 1) % game_tools.NUM_PLAYERS
 
-    return hands[0].num_cards() == 0
+    return players[0].amount() == 0
 
-def simulate_one_random_game(hand, n_cards1, used_cards, display):
+def simulate_one_random_game(player, game_state, display):
     """
     Simulates 1 random game with:
-    hand -- starting hand
-    n_cards1 -- number of cards in opponent 1's hand
-                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
-    used_cards -- list of revealed cards
+    player -- the player object
+    game_state -- game information
     display -- print out results if True
 
     Returns if hand wins the game
     """
+    n_cards1 = game_state.get_player_num_cards((player.position + 1) % 3)
     deck = game_tools.get_new_shuffled_deck()
-    deck = game_tools.remove_from_deck(deck, hand.get_cards())
-    deck = game_tools.remove_from_deck(deck, used_cards)
+    deck = game_tools.remove_from_deck(deck, player.get_cards())
+    deck = game_tools.remove_from_deck(deck, game_state.used_cards)
 
-    hand1 = Hand(deck[0: n_cards1])
-    hand2 = Hand(deck[n_cards1:])
+    player1 = Player(Hand(deck[0: n_cards1]), 1, "")
+    player2 = Player(Hand(deck[n_cards1:]), 2, "")
 
-    return simulate_one_game([hand, hand1, hand2], randint(0, 2), used_cards, display)
+    return simulate_one_game([player, player1, player2], game_state.get_current_turn(), game_state.used_cards, display, prev_play=game_state.prev_play)
 
-def simulate(hand, n_games, n_cards1, used_cards, display=False):
+def simulate(player, n_games, game_state, display=False):
     """
     Simulates n games with:
-    hand -- starting hand
+    player -- the player object
     n_games -- number of games
-    n_cards1 -- number of cards in opponent 1's hand
-                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
-    used_cards -- list of revealed cards
+    game_state -- game information
     Returns number of wins
     """
     wins = 0
     for count in range(n_games):
         if display:
             print("Simulation {}".format(count))
-        hand_sim = copy.deepcopy(hand)
-        if simulate_one_random_game(hand_sim, n_cards1, list(used_cards), display=display):
+        player_sim = copy.deepcopy(player)
+        if simulate_one_random_game(player_sim, game_state, display=display):
             wins += 1
 
     return wins
 
-def _simulation_worker(index, hand, n_games, n_cards1, used_cards, return_list):
+def _simulation_worker(index, player, n_games, game_state, return_list):
     """
     Worker for multiprocessed simulation
     index -- index of the worker and where to store the data
-    hand -- starting hand
+    player -- the player object
     n_games -- number of games
-    n_cards1 -- number of cards in opponent 1's hand
-                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
-    used_cards -- list of revealed cards
+    game_state -- game information
     return_list -- where to store the data
     """
-    return_list[index] = simulate(hand, n_games, n_cards1, used_cards)
+    return_list[index] = simulate(player, n_games, game_state)
 
-def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_processes):
+def simulate_multiprocesses(player, n_games, game_state, n_processes):
     """
     Simulates n games but uses multiple processes
-    hand -- starting hand
+    player -- the player object
     n_games -- number of games
-    n_cards1 -- number of cards in opponent 1's hand
-                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
-    used_cards -- list of revealed cards
+    game_state -- game information
     n_processes -- number of processes
     Returns number of wins
     """
@@ -124,7 +114,7 @@ def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_processes):
     sim_per_process = int(n_games / n_processes)
 
     for i in range(n_processes):
-        sim_args = (i, hand, sim_per_process, n_cards1, used_cards, return_list)
+        sim_args = (i, player, sim_per_process, game_state, return_list)
         p = multiprocessing.Process(target=_simulation_worker, args=sim_args)
         processes.append(p)
         p.start()
@@ -134,16 +124,30 @@ def simulate_multiprocesses(hand, n_games, n_cards1, used_cards, n_processes):
 
     return sum(return_list)
 
-def estimate_hand_strength(hand, n_cards1, used_cards):
+def estimate_hand_strength(player, game_state):
     """
     Estimates hand strength by estimating the probability that the hand wins
-    hand -- the hand to test
-    n_cards1 -- number of cards in opponent 1's hand
-                number of cards in opponent 2's hand = deck - hand - n_cards1 - used_cards
-    used_cards -- list of revealed cards
+    player -- the player object
+    game_state -- game information
     """
-    return simulate_multiprocesses(hand, SIMULATIONS, n_cards1, used_cards, 2) / SIMULATIONS
+    return simulate_multiprocesses(player, SIMULATIONS, game_state, 4) / SIMULATIONS
 
-def estimate_play_strength(card_play, hand, n_cards1, used_cards):
+def estimate_play_strength(card_play, player, game_state):
     """Estimates play strength"""
-    pass
+    # TODO: use probabilities here
+    player_sim = copy.deepcopy(player)
+    game_state_sim = copy.deepcopy(game_state)
+    player_sim.play(card_play)
+    game_state_sim.cards_played(card_play)
+    return estimate_hand_strength(player_sim, game_state_sim)
+
+def get_best_play(card_plays, player, game_state):
+    """Gets best play from list of plays"""
+    best = None
+    best_strength = 0
+    for play in card_plays:
+        strength = estimate_play_strength(play, player, game_state)
+        if strength > best_strength:
+            best_strength = strength
+            best = play
+    return best

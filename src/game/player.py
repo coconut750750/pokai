@@ -15,6 +15,9 @@ class Player(object):
         self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
          DOUBLE_JOKER]
 
+    def get_cards(self):
+        return self.hand.get_cards()
+
     def reveal(self):
         print(self.hand)
 
@@ -102,12 +105,13 @@ class Player(object):
             next_play.position = self.position
         return next_play
 
-    def play(self, card_play):
+    def play(self, card_play, display=False):
         self.hand.remove_cards(card_play.cards)
-        print("{}".format(card_play.play_type))
-        for c in card_play.cards:
-            print(c, end=" ")
-        print()
+        if display:
+            print("{}".format(card_play.play_type))
+            for c in card_play.cards:
+                print(c, end=" ")
+            print()
 
     def amount(self):
         return self.hand.num_cards()

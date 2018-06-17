@@ -12,26 +12,8 @@ from pokai.src.game.card import SMALL_JOKER_VALUE
 class Play(object):
     """Play class"""
 
-    def __init__(self, position, cards, num_extra, play_type=""):
-        """
-        Constructor
-        Arguments:
-        position -- the position of the player that played this
-        cards -- the cards played
-        num_extra -- the extra cards that were played
-        play_type -- the kind of play
-        """
-        self.position = position
-        self.cards = cards
-        self.num_extra = num_extra
-        if not play_type:
-            self.play_type = Play.determine_play_type(cards)
-        else:
-            self.play_type = play_type
-
     @staticmethod
-    def determine_play_type(cards_played):
-        """TODO: Determines the play type of the cards played and returns the corresponding string"""
+    def get_play_from_cards(cards_played):
         total_cards = len(cards_played)
         group_counts = [0, 0, 0, 0]
         counts = {value : len(list(c)) for value, c in groupby(cards_played, lambda card: card.value)}
@@ -62,6 +44,23 @@ class Play(object):
 
         return None
 
+    def __init__(self, position, cards, num_extra, play_type=""):
+        """
+        Constructor
+        Arguments:
+        position -- the position of the player that played this
+        cards -- the cards played
+        num_extra -- the extra cards that were played
+        play_type -- the kind of play
+        """
+        self.position = position
+        self.cards = cards
+        self.num_extra = num_extra
+        if not play_type:
+            self.play_type = Play.get_play_from_cards(cards).play_type
+        else:
+            self.play_type = play_type
+
     def num_base_cards(self):
         """Returns number of cards in play"""
         return len(self.cards) - self.num_extra
@@ -77,7 +76,7 @@ class Play(object):
     def __str__(self):
         """Return string representation"""
         sep = " | "
-        s = "Player {} ".format(self.position) + sep
+        s = "Player ({}) {} ".format(self.play_type, self.position) + sep
         for card in self.cards:
             s += card.display + sep
         return s.strip()

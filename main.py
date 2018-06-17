@@ -67,7 +67,7 @@ def main():
                 player_card_strs = player_card_strs.split(' ')
                 print(player_card_strs)
                 played_cards = Card.strs_to_cards(player_card_strs)
-                next_play = Play.determine_play_type(played_cards)
+                next_play = Play.get_play_from_cards(played_cards)
                 next_play.position = turn
                 game_state.cards_played(next_play)
 

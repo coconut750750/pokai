@@ -19,13 +19,13 @@ DOUBLE_STRAIGHTS = 'double_straights'
 ADJ_TRIPLES = 'adj_triples'
 DOUBLE_JOKER = 'double_joker'
 
-def game_is_over(hands):
+def game_is_over(players):
     """
     Returns if the game is over
     """
     ended = False
-    for h in hands:
-        ended = ended or not h.num_cards()
+    for p in players:
+        ended = ended or not p.hand.num_cards()
     return ended
 
 def get_new_ordered_deck():
@@ -53,5 +53,8 @@ def remove_from_deck(deck, cards):
         return deck
 
     for c in cards:
-        deck.remove(c)
+        try:
+            deck.remove(c)
+        except ValueError:
+            raise ValueError('{} is not in the deck!'.format(str(c)))
     return deck

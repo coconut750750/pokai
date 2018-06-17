@@ -58,7 +58,7 @@ def main():
                                     game_state.get_unrevealed_cards(ai.hand._cards))
             if next_play:
                 game_state.cards_played(next_play)
-                ai.play(next_play)
+                ai.play(next_play, display=True)
         else:
             print("Player {}'s turn.".format(turn))
             player_card_strs = input(PROMPT_PLAYED_CARDS)

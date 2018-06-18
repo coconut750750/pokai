@@ -35,56 +35,46 @@ class AIPlayer(Player):
         self.use_two_threshold = 5
         """
 
-    def get_play(self, prev_play, hand_counts, unrevealed_cards):
+    def get_play(self, game_state):
+        prev_play = game_state.prev_play
+        unrevealed_cards = []
         if not prev_play or prev_play.position == self.position:
             # lead play
-            next_play = self._get_lead_play(hand_counts, unrevealed_cards)
+            next_play = self._get_lead_play(game_state)
         else:
-            if prev_play.play_type == SINGLES:
-                next_play = self.hand.get_low(prev_play.get_base_card(), 1)
-            elif prev_play.play_type == DOUBLES:
-                next_play = self.hand.get_low(prev_play.get_base_card(), 2)
-            elif prev_play.play_type == TRIPLES:
-                next_play = self.hand.get_low(prev_play.get_base_card(), 3,
-                                              prev_play.num_extra)
-            elif prev_play.play_type == STRAIGHTS:
-                next_play = self.hand.get_low_straight(prev_play.get_base_card(),
-                                                       1, prev_play.num_base_cards())
-            elif prev_play.play_type == DOUBLE_STRAIGHTS:
-                next_play = self.hand.get_low_straight(prev_play.get_base_card(),
-                                                       2, int(prev_play.num_base_cards() / 2))
-            elif prev_play.play_type == ADJ_TRIPLES:
-                next_play = self.hand.get_low_adj_triple(prev_play.get_base_card(),
-                                                         prev_play.num_extra)
-            else:
-                next_play = self.hand.get_low_wild(prev_play.get_base_card())
-
+            next_play = self.hand.get_low_play(prev_play)
             # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
             # play wilds
-            if not next_play and hand_counts[prev_play.position] <= 5 * self.hand.get_num_wild():
+            if not next_play and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
                 next_play = self.hand.get_low_wild(None)
 
         if next_play:
             next_play.position = self.position
         return next_play
 
-    def get_best_singles():
+    def get_best_singles(self, game_state):
+        prev_play = game_state.prev_play
+        possible_plays = self.hand.get_possible_basics(prev_play.get_base_card(), 1)
+        best_possible = get_best_play(possible_plays, self, game_state)
+        return best_possible
+
+    def get_best_doubles(self, game_state):
         pass
 
-    def get_best_doubles():
+    def get_best_extra(self, game_state):
         pass
 
-    def get_best_triples():
+    def get_best_triples(self, game_state):
         pass
 
-    def get_best_straights():
+    def get_best_straights(self, game_state):
         pass
 
-    def get_best_double_straights():
+    def get_best_double_straights(self, game_state):
         pass
 
-    def get_best_adj_triples():
+    def get_best_adj_triples(self, game_state):
         pass
 
-    def get_best_wild():
+    def get_best_wild(self, game_state):
         pass

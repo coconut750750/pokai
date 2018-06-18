@@ -139,6 +139,7 @@ def get_best_play(card_plays, player, game_state):
     """Gets best play from list of plays"""
     best = None
     best_strength = 0
+    player = Player(player.hand, player.position, player.type)
     for play in card_plays:
         strength = estimate_play_strength(play, player, game_state)
         if strength > best_strength:

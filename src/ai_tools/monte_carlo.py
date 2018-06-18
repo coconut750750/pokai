@@ -10,7 +10,7 @@ from pokai.src.game.game_tools import *
 from pokai.src.game.hand import Hand
 from pokai.src.game.player import Player
 
-SIMULATIONS = 1000
+SIMULATIONS = 500
 
 def simulate_one_game(players, game_state, display):
     """
@@ -135,14 +135,17 @@ def estimate_play_strength(card_play, player, game_state):
     game_state_sim.increment_turn()
     return estimate_hand_strength(player_sim, game_state_sim)
 
-def get_best_play(card_plays, player, game_state):
+def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
-    best = None
-    best_strength = 0
+    strengths = {}
     player = Player(player.hand, player.position, player.type)
     for play in card_plays:
-        strength = estimate_play_strength(play, player, game_state)
-        if strength > best_strength:
-            best_strength = strength
-            best = play
-    return best
+        play.position = player.position
+        strengths[play.get_base_card().value] = estimate_play_strength(play, player, game_state)
+    ordered_plays = sorted(card_plays,
+                           key=lambda play: strengths[play.get_base_card().value],
+                           reverse=True)
+    if num_best == 1:
+        return ordered_plays[0]
+    else:
+        return ordered_plays[0: num_best]

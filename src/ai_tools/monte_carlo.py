@@ -9,44 +9,37 @@ import pokai.src.game.game_tools as game_tools
 from pokai.src.game.game_tools import *
 from pokai.src.game.hand import Hand
 from pokai.src.game.player import Player
-from pokai.src.game.aiplayer import AIPlayer
 
 SIMULATIONS = 1000
 
-def simulate_one_game(players, start_pos, used_cards, display, prev_play=None):
+def simulate_one_game(players, game_state, display):
     """
     Simulates 1 game with:
     players -- list of players where starting hand is at index 0
-    start_pos -- player that starts
-    used_cards -- list of used cards
+    game_state -- the starting game state
     display -- print out results if True
 
     To simulate hands fairly, we use a basic Poker player to wrap all hands
     Returns if hand wins the game
     """
+    game_state_sim = copy.deepcopy(game_state)
     if display:
         print("Player 0:", players[0].hand)
         print("Player 1:", players[1].hand)
         print("Player 2:", players[2].hand)
         print("simulation start")
 
-    turn = start_pos
-
     while not game_is_over(players):
-        hand_counts = [p.amount() for p in players]
-        next_play = players[turn].get_play(prev_play, hand_counts, used_cards)
+        turn = game_state_sim.get_current_turn()
+        next_play = players[turn].get_play(game_state_sim)
 
         if next_play:
             players[turn].play(next_play)
+            game_state_sim.cards_played(next_play)
             if display:
                 print(next_play)
-            if next_play.play_type == DOUBLE_JOKER:
-                prev_play = None
-            else:
-                prev_play = next_play
 
-        if prev_play:
-            turn = (turn + 1) % game_tools.NUM_PLAYERS
+        game_state_sim.increment_turn()
 
     return players[0].amount() == 0
 
@@ -67,7 +60,7 @@ def simulate_one_random_game(player, game_state, display):
     player1 = Player(Hand(deck[0: n_cards1]), 1, "")
     player2 = Player(Hand(deck[n_cards1:]), 2, "")
 
-    return simulate_one_game([player, player1, player2], game_state.get_current_turn(), game_state.used_cards, display, prev_play=game_state.prev_play)
+    return simulate_one_game([player, player1, player2], game_state, display)
 
 def simulate(player, n_games, game_state, display=False):
     """
@@ -139,6 +132,7 @@ def estimate_play_strength(card_play, player, game_state):
     game_state_sim = copy.deepcopy(game_state)
     player_sim.play(card_play)
     game_state_sim.cards_played(card_play)
+    game_state_sim.increment_turn()
     return estimate_hand_strength(player_sim, game_state_sim)
 
 def get_best_play(card_plays, player, game_state):

@@ -121,7 +121,7 @@ class TestMC(object):
 
         return game_state, computer
 
-    def test_best_play_simple1(self):
+    def test_best_play_two_singles(self):
         """tests best play function"""
         computer_card_strs = ['0d', '2s']
         unrevealed_card_strs = ['Qd', 'kd']
@@ -131,7 +131,7 @@ class TestMC(object):
         play2 = computer.get_play(game_state)
         assert get_best_play([play1, play2], computer, game_state) == play2
 
-    def test_best_play_simple2(self):
+    def test_best_play_single_and_triple(self):
         """tests best play function"""
         computer_card_strs = ['3d', '3s', '3c', '4c', 'Ah']
         unrevealed_card_strs = ['Qd', 'Qs', 'Qc', '7c', 'Kd', 'Ks', 'Kc', '8d']

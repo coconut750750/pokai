@@ -34,13 +34,13 @@ class Play(object):
         elif group_counts[1] == distinct_cards:
             return Play(-1, cards_played, 0, play_type=DOUBLE_STRAIGHTS)
         elif group_counts[2] == 1:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=TRIPLES)
         elif group_counts[2] == 2:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=ADJ_TRIPLES)
         elif group_counts[3] == 1:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=QUADRUPLES)
 
         return None

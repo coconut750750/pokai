@@ -41,16 +41,43 @@ class TestAIPlayer:
 
     def setup_game_state(self, plays):
         for play in plays:
-            play.position = 2
+            if play:
+                play.position = 2
             self.game_state.cards_played(play)
         self.game_state.increment_turn()
 
-    def test_ai_get_best_singles_1(self):
-        prev_play = Play.get_play_from_cards([Card('5', 'h')])
-        self.setup_game_state([prev_play])
-        print(self.test_ai_player_lv2.get_best_singles(self.game_state))
+    # def test_ai_get_best_singles(self):
+    #     prev_play = Play.get_play_from_cards([Card('3', 'h')])
+    #     self.setup_game_state([prev_play])
+    #     assert self.test_ai_player_lv3.get_best_singles(self.game_state).cards[0] == Card('A', 'c')
 
-    def test_ai_get_best_singles(self):
-        prev_play = Play.get_play_from_cards([Card('3', 'h')])
+    # def test_ai_get_best_singles_none(self):
+    #     self.setup_game_state([None])
+    #     assert self.test_ai_player_lv2.get_best_singles(self.game_state).cards[0] == Card('0', 'c')
+
+    # def test_ai_get_best_doubles(self):
+    #     prev_play = Play.get_play_from_cards([Card('0', 's'), Card('0', 'd')])
+    #     self.setup_game_state([prev_play])
+    #     assert self.test_ai_player_lv2.get_best_doubles(self.game_state).cards[0] == Card('J', 'h')
+
+    # def test_ai_get_best_doubles_none(self):
+    #     self.setup_game_state([None])
+    #     assert self.test_ai_player_lv2.get_best_doubles(self.game_state).cards[0] == Card('9', 'h')
+
+    # def test_ai_get_best_triples_alone(self):
+    #     prev_play = Play.get_play_from_cards([Card('3', 'h'), Card('3', 'd'), Card('3', 'c')])
+    #     self.setup_game_state([prev_play])
+    #     print(self.test_ai_player_lv3.get_best_triples(self.game_state))
+
+    # def test_ai_get_best_triples_single(self):
+    #     prev_play = Play.get_play_from_cards([Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+    #                                           Card('4', 'c')])
+    #     self.setup_game_state([prev_play])
+    #     print(self.test_ai_player_lv3.get_best_triples(self.game_state))
+
+    def test_ai_get_best_triples_double(self):
+        prev_play = Play.get_play_from_cards([Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+                                              Card('4', 'c'), Card('4', 'd')])
         self.setup_game_state([prev_play])
-        print(self.test_ai_player_lv3.get_best_singles(self.game_state))
+        print(self.test_ai_player_lv3.get_best_triples(self.game_state))
+

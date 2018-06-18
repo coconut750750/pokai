@@ -531,9 +531,9 @@ def _print_card_list(card_play, extra_msg=""):
     """prints out a list of cards with a message"""
     if extra_msg:
         extra_msg = "({})".format(extra_msg)
-    print("\nValid {} {}: {}".format(card_play.play_type,
-                                     extra_msg,
-                                     " ".join(str(c) for c in card_play.cards)))
+    # print("\nValid {} {}: {}".format(card_play.play_type,
+    #                                  extra_msg,
+    #                                  " ".join(str(c) for c in card_play.cards)))
 
 def _check_single(single):
     """checks if valid single"""

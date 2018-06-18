@@ -52,20 +52,56 @@ class AIPlayer(Player):
             next_play.position = self.position
         return next_play
 
-    def get_best_singles(self, game_state):
+    def _exclude_from_possible_plays(self, possible_plays, exclude_cards):
+        if not exclude_cards:
+            return possible_plays
+        exclude_values = [c.value for c in exclude_cards]
+        new_possible = []
+        for play in possible_plays:
+            if play.get_base_card().value not in exclude_values:
+                new_possible.append(play)
+        return new_possible
+
+    def get_best_singles(self, game_state, exclude_cards=None, num_best=1):
         prev_play = game_state.prev_play
-        possible_plays = self.hand.get_possible_basics(prev_play.get_base_card(), 1)
-        best_possible = get_best_play(possible_plays, self, game_state)
-        return best_possible
+        base_card = None if not prev_play else prev_play.get_base_card()
+        possible_plays = self.hand.get_possible_basics(base_card, 1)
+        possible_plays = self._exclude_from_possible_plays(possible_plays, exclude_cards)
+        return get_best_play(possible_plays, self, game_state, num_best=num_best)
 
-    def get_best_doubles(self, game_state):
-        pass
+    def get_best_doubles(self, game_state, exclude_cards=None, num_best=1):
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        possible_plays = self.hand.get_possible_basics(base_card, 2)
+        possible_plays = self._exclude_from_possible_plays(possible_plays, exclude_cards)
+        return get_best_play(possible_plays, self, game_state, num_best=num_best)
 
-    def get_best_extra(self, game_state):
-        pass
+    def get_best_triple_extra(self, game_state, exclude_cards):
+        prev_play = game_state.prev_play
+        if not prev_play:
+            raise RuntimeError("Can't call get_best_extra() on lead play yet.")
+        game_state.prev_play = None
+        num_extra = prev_play.num_extra
+        if num_extra == 1:
+            extra = self.get_best_singles(game_state, exclude_cards=exclude_cards)
+        else:
+            extra = self.get_best_doubles(game_state, exclude_cards=exclude_cards)
+        game_state.prev_play = prev_play
+        return extra.cards
 
+    # first, find best alone triple
+    # then, find best extra that is compatible (after removing original 3)
     def get_best_triples(self, game_state):
-        pass
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        possible_plays = self.hand.get_possible_basics(base_card, 3)
+        best_possible = get_best_play(possible_plays, self, game_state)
+        if prev_play and prev_play.num_extra:
+            extra_cards = self.get_best_triple_extra(game_state, [best_possible.get_base_card()])
+            best_possible.cards += extra_cards
+            best_possible.num_extra = len(extra_cards)
+
+        return best_possible
 
     def get_best_straights(self, game_state):
         pass

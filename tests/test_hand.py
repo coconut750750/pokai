@@ -89,6 +89,7 @@ class TestHand(object):
     @staticmethod
     def _check_adj_triple(adj_trip, extras):
         """checks if adj_trip is valid"""
+        print(adj_trip)
         assert adj_trip
         l = len(adj_trip)
         assert l == 6 + extras
@@ -217,6 +218,10 @@ class TestHand(object):
         """test lowest card has lowest val"""
         assert self.hand.get_card(0).value == 1
 
+    def test_hand_organize_cards(self):
+        """tests organize function"""
+        print(self.hand._categories)
+
     def test_hand_sort_cards_order(self):
         """test other cards have values greater at equal to lowest card"""
         low = self.hand.get_card(0)
@@ -320,50 +325,6 @@ class TestHand(object):
         extra = 2
         low_card_play = self.hand_adj_trip.get_low(c, each_count, extra=extra)
         assert not low_card_play
-
-    """
-    GET SECOND LOW
-    """
-
-    def test_hand_get_second_low_single_valid(self):
-        """tests get second low on a valid single"""
-        c = card.Card('3', 'h')
-        each_count = 1
-
-        initial = copy.deepcopy(self.hand)
-        first_low_cards = self.hand.get_low(c, each_count)
-        first_low = first_low_cards.get_base_card()
-        play = self.hand.get_second_low(c, each_count)
-        TestHand._check_single(play.cards)
-        assert initial == self.hand  # hand shouldn't change
-        assert play.get_base_card() > c
-        assert play.get_base_card() >= first_low
-
-        TestHand._print_card_list(play, extra_msg="greater than {}\
-                                                    and second to {}".format(str(c), str(first_low)))
-
-    def test_hand_get_second_low_single_invalid(self):
-        """tests get low on invalid single"""
-        c = card.Card('2', 'h')
-        each_count = 1
-        low_card_play = self.hand.get_second_low(c, each_count)
-        assert not low_card_play
-
-    def test_hand_get_second_low_double_valid(self):
-        """tests get second low on a valid double"""
-        c = card.Card('3', 'h')
-        each_count = 2
-
-        initial = str(self.hand)
-        first_low_cards = self.hand.get_low(c, each_count)
-        first_low = first_low_cards.get_base_card()
-        play = self.hand.get_second_low(c, each_count)
-        assert initial == str(self.hand)  # hand shouldn't change
-        assert play.get_base_card() > c
-        assert play.get_base_card() >= first_low
-        TestHand._check_double(play.cards)
-        TestHand._print_card_list(play, extra_msg="greater than {}\
-                                                    and second to {}".format(str(c), str(first_low)))
 
     """
     GET LOW STRAIGHTS
@@ -513,22 +474,6 @@ class TestHand(object):
         TestHand._check_triple(play.cards)
         assert play.num_cards() == 5
         TestHand._print_card_list(play)
-
-    def test_hand_get_second_low_single_none(self):
-        """tests get second low where other card is None"""
-        c = None
-        each_count = 1
-
-        initial = copy.deepcopy(self.hand)
-        first_low_cards = self.hand.get_low(c, each_count).cards
-        play = self.hand.get_second_low(c, each_count)
-        assert play
-        second_low_cards = play.cards
-        assert first_low_cards and second_low_cards
-        assert initial == self.hand  # hand shouldn't change
-        assert len(second_low_cards) == 1
-        assert second_low_cards[0] >= first_low_cards[0]
-        TestHand._print_card_list(play, extra_msg="second low")
 
     """
     GET NONE STRAIGHTS

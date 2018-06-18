@@ -14,6 +14,7 @@ class Play(object):
 
     @staticmethod
     def get_play_from_cards(cards_played):
+        """Returns a new Play object based on cards played"""
         total_cards = len(cards_played)
         group_counts = [0, 0, 0, 0]
         counts = {value : len(list(c)) for value, c in groupby(cards_played, lambda card: card.value)}

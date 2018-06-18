@@ -23,7 +23,9 @@ class Hand(object):
     """
     def __init__(self, cards):
         super(Hand, self).__init__()
-        self._cards = cards
+        self._cards = []
+        for c in cards:
+            self._cards.append(c)
         self._categories = {}
         self._sort_cards()
         self._organize()
@@ -217,6 +219,26 @@ class Hand(object):
         if self._categories[DOUBLE_JOKER]:
             return Play(-1, self._categories[DOUBLE_JOKER][0], 0, play_type=DOUBLE_JOKER)
         return None
+
+    def get_low_play(self, play):
+        """
+        Returns the lowest play based on other play
+        """
+        if play.play_type == SINGLES:
+            next_play = self.get_low(play.get_base_card(), 1)
+        elif play.play_type == DOUBLES:
+            next_play = self.get_low(play.get_base_card(), 2)
+        elif play.play_type == TRIPLES:
+            next_play = self.get_low(play.get_base_card(), 3, play.num_extra)
+        elif play.play_type == STRAIGHTS:
+            next_play = self.get_low_straight(play.get_base_card(), 1, play.num_base_cards())
+        elif play.play_type == DOUBLE_STRAIGHTS:
+            next_play = self.get_low_straight(play.get_base_card(), 2, int(play.num_base_cards() / 2))
+        elif play.play_type == ADJ_TRIPLES:
+            next_play = self.get_low_adj_triple(play.get_base_card(), play.num_extra)
+        else:
+            next_play = self.get_low_wild(play.get_base_card())
+        return next_play
 
     def get_num_wild(self):
         """

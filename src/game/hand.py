@@ -96,12 +96,38 @@ class Hand(object):
         else:
             return None
 
-    def _get_low_foundation(self, other_card, play_type):
+    def _get_possible_low_foundations(self, other_card, play_type):
+        possibles = []
         for card_group in self._categories[play_type]:
             card = card_group[0]
             if not other_card or card.value > other_card.value:
-                return Play(-1, card_group, 0, play_type=play_type)
-        return None
+                possibles.append(Play(-1, card_group, 0, play_type=play_type))
+        return possibles
+
+    def get_possible_basics(self, other_card, each_count, extra=0):
+        """
+        Get all the possible basic plays
+        """
+        if each_count > 4:
+            return None
+        if each_count < 3:
+            extra = 0
+
+        plays = self._get_possible_low_foundations(other_card, CATEGORIES[each_count - 1])
+        if not plays:
+            return None
+        refined_plays = []
+        for play in plays:
+            extra_cards = []
+            if each_count == 3 and extra:
+                extra_cards = self.get_extra_cards(play.cards, extra, 1)
+            elif each_count == 4 and extra:
+                extra_cards = self.get_extra_cards(play.cards, extra // 2, 2)
+            if extra_cards or not extra:
+                play.cards += extra_cards
+                play.num_extra = len(extra_cards)
+                refined_plays.append(play)
+        return refined_plays
 
     def get_low(self, other_card, each_count, extra=0):
         """
@@ -113,24 +139,29 @@ class Hand(object):
                                            (2 or 4 for quad)
         Returns the lowest play with pos -1 or None
         """
-        if each_count > 4:
-            return None
-        if each_count < 3:
-            extra = 0
+        possible = self.get_possible_basics(other_card, each_count, extra=extra)
+        if possible:
+            return possible[0]
+        return None
 
-        play = self._get_low_foundation(other_card, CATEGORIES[each_count - 1])
-        if not play:
-            return None
-        extra_cards = []
-        if each_count == 3 and extra:
-            extra_cards = self.get_extra_cards(play.cards, extra, 1)
-        elif each_count == 4 and extra:
-            extra_cards = self.get_extra_cards(play.cards, extra // 2, 2)
-        if not extra_cards and extra:
-            return None
-        play.cards += extra_cards
-        play.num_extra = len(extra_cards)
-        return play
+    def get_possible_straights(self, other_card, each_count, length):
+        """
+        Gets all the possible straights
+        """
+        play_type = CATEGORIES[4 + each_count - 1]
+
+        plays = []
+        for card_group in self._categories[play_type]:
+            # although first card is less, might be able to just take the top portion of the straight
+            if not other_card:
+                plays.append(Play(-1, card_group, 0, play_type=play_type))
+            elif card_group[0].value <= other_card.value:
+                for i, c in enumerate(card_group):
+                    if c.value > other_card.value and len(card_group) - i >= length * each_count:
+                        plays.append(Play(-1, card_group[i: i + length * each_count], 0, play_type=play_type))
+            elif len(card_group) >= length * each_count:
+                plays.append(Play(-1, card_group[0: length * each_count], 0, play_type=play_type))
+        return plays
 
     def get_low_straight(self, other_card, each_count, length):
         """
@@ -143,20 +174,9 @@ class Hand(object):
 
         Returns play with pos of -1 or None
         """
-        play_type = CATEGORIES[4 + each_count - 1]
-
-        if not other_card:
-            if self._categories[play_type]:
-                return Play(-1, self._categories[play_type][0], 0, play_type=play_type)
-            return None
-        for card_group in self._categories[play_type]:
-            # although first card is less, might be able to just take the top portion of the straight
-            if card_group[0].value <= other_card.value:
-                for i, c in enumerate(card_group):
-                    if c.value > other_card.value and len(card_group) - i >= length * each_count:
-                        return Play(-1, card_group[i: i + length * each_count], 0, play_type=play_type)
-            elif len(card_group) >= length * each_count:
-                return Play(-1, card_group[0: length * each_count], 0, play_type=play_type)
+        possible = self.get_possible_straights(other_card, each_count, length)
+        if possible:
+            return possible[0]
         return None
 
     def get_low_adj_triple(self, other_card, num_extra):

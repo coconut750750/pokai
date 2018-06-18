@@ -58,9 +58,9 @@ class TestHand(object):
         """prints out a list of cards with a message"""
         if extra_msg:
             extra_msg = "({})".format(extra_msg)
-        print("\nValid {} {}: {}".format(card_play.play_type,
-                                         extra_msg,
-                                         " ".join(str(c) for c in card_play.cards)))
+        # print("\nValid {} {}: {}".format(card_play.play_type,
+        #                                  extra_msg,
+        #                                  " ".join(str(c) for c in card_play.cards)))
 
     @staticmethod
     def _check_single(single):
@@ -89,7 +89,6 @@ class TestHand(object):
     @staticmethod
     def _check_adj_triple(adj_trip, extras):
         """checks if adj_trip is valid"""
-        print(adj_trip)
         assert adj_trip
         l = len(adj_trip)
         assert l == 6 + extras

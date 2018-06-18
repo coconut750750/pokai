@@ -14,6 +14,7 @@ class Play(object):
 
     @staticmethod
     def get_play_from_cards(cards_played):
+        """Returns a new Play object based on cards played"""
         total_cards = len(cards_played)
         group_counts = [0, 0, 0, 0]
         counts = {value : len(list(c)) for value, c in groupby(cards_played, lambda card: card.value)}
@@ -76,7 +77,7 @@ class Play(object):
     def __str__(self):
         """Return string representation"""
         sep = " | "
-        s = "Player ({}) {} ".format(self.play_type, self.position) + sep
+        s = "Player ({} with {} extra cards) {} ".format(self.play_type, self.num_extra, self.position) + sep
         for card in self.cards:
             s += card.display + sep
         return s.strip()

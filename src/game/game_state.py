@@ -13,7 +13,6 @@ class GameState(object):
 
     def __init__(self, n_cards0, n_cards1):
         self.used_cards = []
-        self.unused_cards = get_new_ordered_deck()
         self.player_cards = [n_cards0, n_cards1,
                              TOTAL_CARDS - n_cards0 - n_cards1]
         self.current_turn = self.player_cards.index(20)
@@ -26,9 +25,7 @@ class GameState(object):
         """
         self.player_cards[card_play.position] -= len(card_play.cards)
         self.used_cards += card_play.cards
-        self.unused_cards = remove_from_deck(self.unused_cards, card_play.cards)
         self.prev_play = card_play
-        self.increment_turn()
 
     def increment_turn(self):
         """
@@ -52,7 +49,8 @@ class GameState(object):
         """
         Returns a list of unrevealed cards based on player 0's perspective
         """
-        deck = copy.deepcopy(self.unused_cards)
+        deck = get_new_ordered_deck()
+        deck = remove_from_deck(deck, self.used_cards)
         deck = remove_from_deck(deck, player0_cards)
         return deck
 

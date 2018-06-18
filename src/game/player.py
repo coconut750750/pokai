@@ -12,8 +12,6 @@ class Player(object):
         self.hand = hand
         self.position = position
         self.type = t
-        self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
-         DOUBLE_JOKER]
 
     def get_cards(self):
         return self.hand.get_cards()
@@ -24,63 +22,61 @@ class Player(object):
     def info(self):
         self.hand.print_categories()
 
-    def _get_lead_play(self, hand_counts, unrevealed_cards):
+    def _get_possible_leads(self, game_state):
+        possible_leads = []
+        possible_leads.append(self._get_lead_adj_triples(game_state))
+        possible_leads.append(self._get_lead_straight(2, game_state))
+        possible_leads.append(self._get_lead_straight(1, game_state))
+        possible_leads.append(self._get_lead_triple(game_state))
+        possible_leads.append(self._get_lead_basic(2, game_state))
+        possible_leads.append(self._get_lead_basic(1, game_state))
+        possible_leads.append(self._get_lead_wild(game_state))
+        possible_leads = list(filter(lambda play: play != None, possible_leads))
+        return possible_leads + [None]
+
+    def _get_lead_play(self, game_state):
         """
         Gets the best play if this player is starting.
         Returns lead play
         """
-        for play_type in self.order:
-            next_play = None
-            if play_type == SINGLES:
-                next_play = self._get_lead_basic(1, hand_counts, unrevealed_cards)
-            elif play_type == DOUBLES:
-                next_play = self._get_lead_basic(2, hand_counts, unrevealed_cards)
-            elif play_type == TRIPLES:
-                next_play = self._get_lead_triple(hand_counts, unrevealed_cards)
-            elif play_type == STRAIGHTS:
-                next_play = self._get_lead_straight(1, hand_counts, unrevealed_cards)
-            elif play_type == DOUBLE_STRAIGHTS:
-                next_play = self._get_lead_straight(2, hand_counts, unrevealed_cards)
-            elif play_type == ADJ_TRIPLES:
-                next_play = self._get_lead_adj_triples(hand_counts, unrevealed_cards)
-            else:
-                next_play = self._get_lead_wild(hand_counts, unrevealed_cards)
 
-            if next_play:
-                return next_play
-        return None
+        # [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES,
+                     # DOUBLE_JOKER]
+        return self._get_possible_leads(game_state)[0]
 
-    def _get_lead_basic(self, each_count, hand_counts, unrevealed_cards):
+    def _get_lead_basic(self, each_count, game_state):
         return self.hand.get_low(None, each_count)
 
-    def _get_lead_triple(self, hand_counts, unrevealed_cards):
+    def _get_lead_triple(self, game_state):
         for i in [2, 1, 0]:
             next_play = self.hand.get_low(None, 3, i)
             if next_play:
                 return next_play
         return None
 
-    def _get_lead_adj_triples(self, hand_counts, unrevealed_cards):
+    def _get_lead_adj_triples(self, game_state):
         for i in [2, 4, 0]:
             next_play = self.hand.get_low_adj_triple(None, i)
             if next_play:
                 return next_play
         return None
 
-    def _get_lead_straight(self, each_count, hand_counts, unrevealed_cards):
+    def _get_lead_straight(self, each_count, game_state):
         return self.hand.get_low_straight(None, each_count, -1)
 
-    def _get_lead_wild(self, hand_counts, unrevealed_cards):
+    def _get_lead_wild(self, game_state):
         return self.hand.get_low_wild(None)
 
-    def get_play(self, prev_play, hand_counts, unrevealed_cards):
+    def get_play(self, game_state):
         """
         Returns lowest play of play_type
         """
-        is_leading = not prev_play or prev_play.position == self.position
-        if is_leading:
+        prev_play = game_state.prev_play
+        hand_counts = game_state.player_cards
+        unrevealed_cards = []
+        if not prev_play or prev_play.position == self.position:
             # lead play
-            next_play = self._get_lead_play(hand_counts, unrevealed_cards)
+            next_play = self._get_lead_play(game_state)
         else:
             if prev_play.play_type == SINGLES:
                 next_play = self.hand.get_low(prev_play.get_base_card(), 1)

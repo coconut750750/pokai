@@ -5,7 +5,7 @@ Testing module for Monte Carlo simulations
 import time
 from pokai.src.ai_tools.monte_carlo import *
 from pokai.src.game.card import Card
-import pokai.src.game.hand as hand
+from pokai.src.game.hand import Hand
 from pokai.src.game.player import Player
 from pokai.src.game.game_state import GameState
 import pokai.src.game.game_tools as game_tools
@@ -23,8 +23,8 @@ class TestMC(object):
         """
         cls.card_strs_lv1 = ['7h', '6h', '0d', '3s', '6s', 'Js', '7d', '9c', 'Ac',
                              'Kd', '5h', '2H', '5C', '0C', '0H', '4D', 'KH']
-        cls.card_strs_lv2 = ['3h', '4s', '4h', '5d', '6s', '7c', '9h', '9d', 'jh',
-                             'jc', 'ks', 'kd', 'ac', 'ah', '2c', '2d']
+        cls.card_strs_lv2 = ['3h', '4s', '4h', '5d', '6s', '7c', '9h', '9d', '0c',
+                             'jh', 'jc', 'ks', 'kd', 'ac', 'ah', '2c', '2d']
         cls.card_strs_lv3 = ['3s', '4h', '5d', '6c', '7s', '9s', '9c', '9d', '9h',
                              '0d', 'Jh', 'Qh', 'Ks', 'As', 'Ah', '2h', '2c']
         cls.card_strs_lv4 = ['Z1', 'Z0', '2H', '2S', '2D', '2C', 'AS', 'AD', 'AH',
@@ -34,35 +34,24 @@ class TestMC(object):
         """ setup any state tied to the execution of the given method in a
         class.  setup_method is invoked for every test method of a class.
         """
-        hand_lv1 = hand.Hand([])
+        hand_lv1 = Hand([])
         hand_lv1.add_cards(card_strs=TestMC.card_strs_lv1)
         self.test_player_lv1 = Player(hand_lv1, 0, "")
 
-        hand_lv2 = hand.Hand([])
+        hand_lv2 = Hand([])
         hand_lv2.add_cards(card_strs=TestMC.card_strs_lv2)
         self.test_player_lv2 = Player(hand_lv2, 0, "")
 
-        hand_lv3 = hand.Hand([])
+        hand_lv3 = Hand([])
         hand_lv3.add_cards(card_strs=TestMC.card_strs_lv3)
         self.test_player_lv3 = Player(hand_lv3, 0, "")
 
-        hand_lv4 = hand.Hand([])
+        hand_lv4 = Hand([])
         hand_lv4.add_cards(card_strs=TestMC.card_strs_lv4)
         self.test_player_lv4 = Player(hand_lv4, 0, "")
 
         self.game_state = GameState(17, 17)
 
-    def test_simulate_one(self):
-        """tests one non random game"""
-        test_hand2 = hand.Hand([])
-        test_hand2.add_cards(card_strs=['3d', '3s', '5c', '6h', '7h', '8h', '8d', '8s',
-                                        '9c', '0s', '0d', 'js', 'Qh', 'Qs', 'Kc', '2h', 'Z1'])
-        test_hand3 = hand.Hand([])
-        test_hand3.add_cards(card_strs=['3c', '4c', '5h', '6d', '6c', '7s', '8c', '9s',
-                                        '0c', '0h', 'Jd', 'Qc', 'Qd', 'Kh', 'As', '2s', 'Z0'])
-        simulate_one_game([self.test_player_lv2,
-                           Player(test_hand2, 0, ""),
-                           Player(test_hand3, 0, "")], 0, [], False)
 
     def test_simulate_one_random(self):
         """tests the simulation of one game"""
@@ -126,7 +115,7 @@ class TestMC(object):
         game_state.unused_cards = Card.strs_to_cards(computer_card_strs + unrevealed_card_strs)
         game_state.used_cards = game_tools.remove_from_deck(get_new_ordered_deck(), game_state.unused_cards)
         game_state.player_cards = [len(computer_card_strs), n_cards1, len(unrevealed_card_strs) - n_cards1]
-        computer_hand = hand.Hand([])
+        computer_hand = Hand([])
         computer_hand.add_cards(card_strs=computer_card_strs)
         computer = Player(computer_hand, 0, "")
 
@@ -137,12 +126,9 @@ class TestMC(object):
         computer_card_strs = ['0d', '2s']
         unrevealed_card_strs = ['Qd', 'kd']
         game_state, computer = TestMC.generate_game_state(computer_card_strs, unrevealed_card_strs, 1)
-        play1 = computer.get_play(None,
-                                  game_state.player_cards,
-                                  game_state.get_unrevealed_cards(computer.get_cards()))
-        play2 = computer.get_play(Play(2, [Card('K', 'h')], 0),
-                                  game_state.player_cards,
-                                  game_state.get_unrevealed_cards(computer.get_cards()))
+        play1 = computer.get_play(game_state)
+        game_state.prev_play = Play(2, [Card('K', 'h')], 0)
+        play2 = computer.get_play(game_state)
         assert get_best_play([play1, play2], computer, game_state) == play2
 
     def test_best_play_simple2(self):
@@ -150,11 +136,8 @@ class TestMC(object):
         computer_card_strs = ['3d', '3s', '3c', '4c', 'Ah']
         unrevealed_card_strs = ['Qd', 'Qs', 'Qc', '7c', 'Kd', 'Ks', 'Kc', '8d']
         game_state, computer = TestMC.generate_game_state(computer_card_strs, unrevealed_card_strs, 1)
-        play1 = computer.get_play(None,
-                                  game_state.player_cards,
-                                  game_state.get_unrevealed_cards(computer.get_cards()))
-        play2 = computer.get_play(Play(2, [Card('K', 'h')], 0),
-                                  game_state.player_cards,
-                                  game_state.get_unrevealed_cards(computer.get_cards()))
+        play1 = computer.get_play(game_state)
+        game_state.prev_play = Play(2, [Card('K', 'h')], 0)
+        play2 = computer.get_play(game_state)
         assert get_best_play([play1, play2], computer, game_state) == play2
 

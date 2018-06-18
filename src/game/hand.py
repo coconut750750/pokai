@@ -79,10 +79,10 @@ class Hand(object):
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
             self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
 
-    def get_extra_cards(self, exclude_cards, each_count, num_extra):
+    def _get_extra_cards(self, exclude_cards, each_count, num_extra):
         """gets extra cards"""
         if num_extra != 1 and num_extra != 2:
-            return None
+            return []
         extra_cards = []
         index = 0
         possible_cards = self._categories[CATEGORIES[each_count - 1]]
@@ -94,7 +94,7 @@ class Hand(object):
         if num_extra == 0:
             return extra_cards
         else:
-            return None
+            return []
 
     def _get_possible_low_foundations(self, other_card, play_type):
         possibles = []
@@ -114,15 +114,13 @@ class Hand(object):
             extra = 0
 
         plays = self._get_possible_low_foundations(other_card, CATEGORIES[each_count - 1])
-        if not plays:
-            return None
         refined_plays = []
         for play in plays:
             extra_cards = []
             if each_count == 3 and extra:
-                extra_cards = self.get_extra_cards(play.cards, extra, 1)
+                extra_cards = self._get_extra_cards(play.cards, extra, 1)
             elif each_count == 4 and extra:
-                extra_cards = self.get_extra_cards(play.cards, extra // 2, 2)
+                extra_cards = self._get_extra_cards(play.cards, extra // 2, 2)
             if extra_cards or not extra:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -179,6 +177,21 @@ class Hand(object):
             return possible[0]
         return None
 
+    def get_possible_adj_triples(self, other_card, num_extra):
+        """
+        Gets all the possible adj triples
+        """
+        plays = self.get_possible_straights(other_card, 3, 2)
+        refined_plays = []
+        for play in plays:
+            extra_cards = []
+            extra_cards = self._get_extra_cards(play.cards, num_extra // 2, 2)
+            if not num_extra or extra_cards:
+                play.cards += extra_cards
+                play.num_extra = len(extra_cards)
+                refined_plays.append(play)
+        return refined_plays
+
     def get_low_adj_triple(self, other_card, num_extra):
         """
         Gets the lowest adj triple that meets the properties
@@ -188,15 +201,10 @@ class Hand(object):
                        4 if it carries 2 doubles
         Returns play with pos of -1 or None
         """
-        foundation = self.get_low_straight(other_card, 3, 2)
-        if not foundation:
-            return
-        extra_cards = []
-        if num_extra:
-            extra_cards = self.get_extra_cards(foundation.cards, num_extra // 2, 2)
-            if not extra_cards:
-                return None
-        return Play(-1, foundation.cards + extra_cards, num_extra, play_type=ADJ_TRIPLES)
+        possible = self.get_possible_adj_triples(other_card, num_extra)
+        if possible:
+            return possible[0]
+        return None
 
     def get_low_wild(self, other_card):
         """

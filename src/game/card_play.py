@@ -34,13 +34,13 @@ class Play(object):
         elif group_counts[1] == distinct_cards:
             return Play(-1, cards_played, 0, play_type=DOUBLE_STRAIGHTS)
         elif group_counts[2] == 1:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=TRIPLES)
         elif group_counts[2] == 2:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=ADJ_TRIPLES)
         elif group_counts[3] == 1:
-            extra = group_counts[0] + group_counts[1]
+            extra = group_counts[0] + group_counts[1] * 2
             return Play(-1, cards_played, extra, play_type=QUADRUPLES)
 
         return None
@@ -77,7 +77,14 @@ class Play(object):
     def __str__(self):
         """Return string representation"""
         sep = " | "
-        s = "Player ({} with {} extra cards) {} ".format(self.play_type, self.num_extra, self.position) + sep
+        s = "Player {} ({} with {} extra cards) ".format(self.position, self.play_type, self.num_extra) + sep
         for card in self.cards:
             s += card.display + sep
         return s.strip()
+
+    def __repr__(self):
+        sep = " | "
+        s = "{} with {} extra cards".format(self.play_type, self.num_extra) + sep
+        for card in self.cards:
+            s += card.display + sep
+        return "[{}]".format(s.strip())

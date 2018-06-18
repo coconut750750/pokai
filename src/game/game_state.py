@@ -23,8 +23,9 @@ class GameState(object):
         Called when a player plays cards
         cards_played -- list of cards that were played
         """
-        self.player_cards[card_play.position] -= len(card_play.cards)
-        self.used_cards += card_play.cards
+        if card_play:
+            self.player_cards[card_play.position] -= len(card_play.cards)
+            self.used_cards += card_play.cards
         self.prev_play = card_play
 
     def increment_turn(self):

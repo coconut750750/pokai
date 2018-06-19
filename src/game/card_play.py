@@ -5,6 +5,7 @@ play in the game.
 """
 
 from itertools import groupby
+
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from pokai.src.game.card import SMALL_JOKER_VALUE

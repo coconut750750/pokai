@@ -3,8 +3,9 @@ Monte Carlo module.
 Provides functionality to estimate hand and play strength
 """
 import multiprocessing
-import copy
+from copy import deepcopy
 from random import randint
+
 import pokai.src.game.game_tools as game_tools
 from pokai.src.game.game_tools import *
 from pokai.src.game.hand import Hand
@@ -22,7 +23,7 @@ def simulate_one_game(players, game_state, display):
     To simulate hands fairly, we use a basic Poker player to wrap all hands
     Returns if hand wins the game
     """
-    game_state_sim = copy.deepcopy(game_state)
+    game_state_sim = deepcopy(game_state)
     if display:
         print("Player 0:", players[0].hand)
         print("Player 1:", players[1].hand)
@@ -74,7 +75,7 @@ def simulate(player, n_games, game_state, display=False):
     for count in range(n_games):
         if display:
             print("Simulation {}".format(count))
-        player_sim = copy.deepcopy(player)
+        player_sim = deepcopy(player)
         if simulate_one_random_game(player_sim, game_state, display=display):
             wins += 1
 
@@ -128,24 +129,40 @@ def estimate_hand_strength(player, game_state):
 def estimate_play_strength(card_play, player, game_state):
     """Estimates play strength"""
     # TODO: use probabilities here
-    player_sim = copy.deepcopy(player)
-    game_state_sim = copy.deepcopy(game_state)
+    player_sim = deepcopy(player)
+    game_state_sim = deepcopy(game_state)
     player_sim.play(card_play)
     game_state_sim.cards_played(card_play)
     game_state_sim.increment_turn()
     return estimate_hand_strength(player_sim, game_state_sim)
 
-def get_best_play(card_plays, player, game_state, num_best=1):
-    """Gets best play from list of plays"""
-    strengths = {}
-    player = Player(player.hand, player.position, player.type)
+def _get_best_single_play(card_plays, player, game_state):
+    """Gets the best play optimized for returning only one play"""
+    best_play = None
+    best_strength = -1
     for play in card_plays:
         play.position = player.position
-        strengths[play.get_base_card().value] = estimate_play_strength(play, player, game_state)
-    ordered_plays = sorted(card_plays,
-                           key=lambda play: strengths[play.get_base_card().value],
-                           reverse=True)
+        strength = estimate_play_strength(play, player, game_state)
+        if strength > best_strength:
+            best_strength = strength
+            best_play = play
+    return best_play
+
+def get_best_play(card_plays, player, game_state, num_best=1):
+    """Gets best play from list of plays"""
+    if not card_plays:
+        return None
+    if len(card_plays) == 1:
+        return card_plays[0]
+    player = Player(player.hand, player.position, player.type)
     if num_best == 1:
-        return ordered_plays[0]
-    else:
-        return ordered_plays[0: num_best]
+        return _get_best_single_play(card_plays, player, game_state)
+    
+    strengths = {}
+    for play in card_plays:
+        play.position = player.position
+        strengths[play] = estimate_play_strength(play, player, game_state)
+    ordered_plays = sorted(card_plays,
+                           key=lambda play: strengths[play],
+                           reverse=True)
+    return ordered_plays[0: num_best]

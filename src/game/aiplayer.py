@@ -104,10 +104,18 @@ class AIPlayer(Player):
         return best_possible
 
     def get_best_straights(self, game_state):
-        pass
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        base_length = -1 if not prev_play else prev_play.num_base_cards()
+        possible_plays = self.hand.get_possible_straights(base_card, 1, base_length)
+        return get_best_play(possible_plays, self, game_state)
 
     def get_best_double_straights(self, game_state):
-        pass
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        base_length = -1 if not prev_play else prev_play.num_base_cards() // 2
+        possible_plays = self.hand.get_possible_straights(base_card, 2, base_length)
+        return get_best_play(possible_plays, self, game_state)
 
     def get_best_adj_triples(self, game_state):
         pass

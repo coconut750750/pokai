@@ -137,6 +137,10 @@ def estimate_play_strength(card_play, player, game_state):
 
 def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
+    if not card_plays:
+        return None
+    if len(card_plays) == 1:
+        return card_plays[0]
     strengths = {}
     player = Player(player.hand, player.position, player.type)
     for play in card_plays:

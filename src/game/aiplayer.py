@@ -66,17 +66,10 @@ class AIPlayer(Player):
                 new_possible.append(play)
         return new_possible
 
-    def get_best_singles(self, game_state, exclude_cards=None, num_best=1):
+    def _get_best_singular_basic(self, game_state, each_count, exclude_cards, num_best):
         prev_play = game_state.prev_play
         base_card = None if not prev_play else prev_play.get_base_card()
-        possible_plays = self.hand.get_possible_basics(base_card, 1)
-        possible_plays = self._exclude_from_possible_plays(possible_plays, exclude_cards)
-        return get_best_play(possible_plays, self, game_state, num_best=num_best)
-
-    def get_best_doubles(self, game_state, exclude_cards=None, num_best=1):
-        prev_play = game_state.prev_play
-        base_card = None if not prev_play else prev_play.get_base_card()
-        possible_plays = self.hand.get_possible_basics(base_card, 2)
+        possible_plays = self.hand.get_possible_basics(base_card, each_count)
         possible_plays = self._exclude_from_possible_plays(possible_plays, exclude_cards)
         return get_best_play(possible_plays, self, game_state, num_best=num_best)
 
@@ -90,28 +83,31 @@ class AIPlayer(Player):
         best_extra = get_best_play(possible_plays, self, game_state)
         return best_extra
 
+    def get_best_singles(self, game_state, exclude_cards=None, num_best=1):
+        return self._get_best_singular_basic(game_state, 1, exclude_cards, num_best)
+
+    def get_best_doubles(self, game_state, exclude_cards=None, num_best=1):
+        return self._get_best_singular_basic(game_state, 2, exclude_cards, num_best)
+
     def get_best_triples(self, game_state):
         prev_play = game_state.prev_play
-        base_card = None if not prev_play else prev_play.get_base_card()
-        possible_plays = self.hand.get_possible_basics(base_card, 3)
-        best_possible = get_best_play(possible_plays, self, game_state)
+        best_play = self._get_best_singular_basic(game_state, 3, [], 1)
         if prev_play and prev_play.num_extra:
-            return self._get_best_triple_extra(game_state, best_possible)
-        return best_possible
+            return self._get_best_triple_extra(game_state, best_play)
+        return best_play
+
+    def _get_best_singular_straight(self, game_state, each_count):
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        base_length = -1 if not prev_play else prev_play.num_base_cards() // each_count
+        possible_plays = self.hand.get_possible_straights(base_card, each_count, base_length)
+        return get_best_play(possible_plays, self, game_state)
 
     def get_best_straights(self, game_state):
-        prev_play = game_state.prev_play
-        base_card = None if not prev_play else prev_play.get_base_card()
-        base_length = -1 if not prev_play else prev_play.num_base_cards()
-        possible_plays = self.hand.get_possible_straights(base_card, 1, base_length)
-        return get_best_play(possible_plays, self, game_state)
+        return self._get_best_singular_straight(game_state, 1)
 
     def get_best_double_straights(self, game_state):
-        prev_play = game_state.prev_play
-        base_card = None if not prev_play else prev_play.get_base_card()
-        base_length = -1 if not prev_play else prev_play.num_base_cards() // 2
-        possible_plays = self.hand.get_possible_straights(base_card, 2, base_length)
-        return get_best_play(possible_plays, self, game_state)
+        return self._get_best_singular_straight(game_state, 2)
 
     def get_best_adj_triples(self, game_state):
         pass

@@ -2,6 +2,8 @@
 Testing Module for AI Player
 """
 
+from copy import deepcopy
+
 from pokai.src.game.card import Card
 from pokai.src.game.game_state import GameState
 from pokai.src.game.card_play import Play
@@ -36,17 +38,25 @@ class TestAIPlayer:
 
         self.game_state = GameState(17, 17)
 
+    def teardown_method(self):
+        self._check_game_state_constant()
+
     def setup_game_state(self, plays):
         for play in plays:
             if play:
                 play.position = 2
             self.game_state.cards_played(play)
         self.game_state.increment_turn()
+        self.initial_game_state = deepcopy(self.game_state)
+
+    def _check_game_state_constant(self):
+        assert self.initial_game_state == self.game_state
 
     def test_ai_get_best_singles(self):
         prev_play = Play.get_play_from_cards([Card('3', 'h')])
         self.setup_game_state([prev_play])
         best_play = self.test_ai_player_lv3.get_best_singles(self.game_state)
+        print(best_play)
         assert best_play.cards[0] == Card('A', 'c')
 
     def test_ai_get_best_singles_none(self):

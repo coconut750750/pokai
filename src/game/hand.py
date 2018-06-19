@@ -4,6 +4,7 @@ Contains the Hand class and other constants
 """
 
 from itertools import groupby
+
 from pokai.src.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER

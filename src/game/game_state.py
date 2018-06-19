@@ -2,7 +2,6 @@
 Game State module
 """
 
-import copy
 from pokai.src.game.game_tools import TOTAL_CARDS, NUM_PLAYERS,\
                                  get_new_ordered_deck, remove_from_deck
 
@@ -23,10 +22,13 @@ class GameState(object):
         Called when a player plays cards
         cards_played -- list of cards that were played
         """
+        self.discard_cards(card_play)
+        self.prev_play = card_play
+
+    def discard_cards(self, card_play):
         if card_play:
             self.player_cards[card_play.position] -= len(card_play.cards)
             self.used_cards += card_play.cards
-        self.prev_play = card_play
 
     def increment_turn(self):
         """
@@ -61,3 +63,10 @@ class GameState(object):
             return self.player_cards.index(0)
         else:
             return -1
+
+    def __eq__(self, other):
+        return other != None and\
+               self.used_cards == other.used_cards and\
+               self.player_cards == other.player_cards and\
+               self.current_turn == other.current_turn and\
+               str(self.prev_play) == str(other.prev_play)

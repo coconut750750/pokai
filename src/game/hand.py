@@ -4,6 +4,7 @@ Contains the Hand class and other constants
 """
 
 from itertools import groupby
+
 from pokai.src.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
@@ -156,9 +157,9 @@ class Hand(object):
     def get_possible_straights(self, other_card, each_count, length, max=-1):
         """
         Gets all the possible straights
+        length = each_count * distinct number of cards
         """
         play_type = CATEGORIES[4 + each_count - 1]
-
         plays = []
         for card_group in self._categories[play_type]:
             if not max:
@@ -170,8 +171,7 @@ class Hand(object):
             for i, c in enumerate(card_group):
                 if c.value > other_card.value and len(card_group) - i >= length * each_count:
                     plays.append(Play(-1, card_group[i: i + length * each_count], 0, play_type=play_type))
-                    max -=1
-        
+                    max -= 1
         return plays
 
     def get_low_straight(self, other_card, each_count, length):
@@ -181,6 +181,7 @@ class Hand(object):
         other_card -- lowest card in the opposing straight
         each_count -- if its a single, double, or triple straight
         length -- length of the opposing straight
+                  each_count * distinct number of cards
                   length is ignored when other_card is None
 
         Returns play with pos of -1 or None

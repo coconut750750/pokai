@@ -136,7 +136,7 @@ def estimate_play_strength(card_play, player, game_state):
     game_state_sim.increment_turn()
     return estimate_hand_strength(player_sim, game_state_sim)
 
-def _get_best_single_play(card_plays, player, game_state):
+def _get_single_best_play(card_plays, player, game_state):
     """Gets the best play optimized for returning only one play"""
     best_play = None
     best_strength = -1
@@ -148,16 +148,8 @@ def _get_best_single_play(card_plays, player, game_state):
             best_play = play
     return best_play
 
-def get_best_play(card_plays, player, game_state, num_best=1):
-    """Gets best play from list of plays"""
-    if not card_plays:
-        return None
-    if len(card_plays) == 1:
-        return card_plays[0]
-    player = Player(player.hand, player.position, player.type)
-    if num_best == 1:
-        return _get_best_single_play(card_plays, player, game_state)
-    
+def _get_multiple_best_plays(card_plays, player, game_state, num_best):
+    """Gets the top { num_best } players"""
     strengths = {}
     for play in card_plays:
         play.position = player.position
@@ -166,3 +158,15 @@ def get_best_play(card_plays, player, game_state, num_best=1):
                            key=lambda play: strengths[play],
                            reverse=True)
     return ordered_plays[0: num_best]
+
+def get_best_play(card_plays, player, game_state, num_best=1):
+    """Gets best play from list of plays"""
+    if not card_plays:
+        return None
+    if len(card_plays) == 1:
+        return card_plays[0]
+    player = Player(player.hand, player.position, player.type)
+    if num_best == 1:
+        return _get_single_best_play(card_plays, player, game_state)
+    else:
+        return _get_multiple_best_plays(card_plays, player, game_state, num_best)

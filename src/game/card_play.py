@@ -75,6 +75,12 @@ class Play(object):
         """Returns the base card of this play (the card another player needs to beat)"""
         return self.cards[0]
 
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
     def __str__(self):
         """Return string representation"""
         sep = " | "

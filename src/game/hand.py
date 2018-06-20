@@ -104,7 +104,7 @@ class Hand(object):
                 break
         return extra_cards
 
-    def get_extra_cards(self, exclude_cards, each_count, extra_type):
+    def _get_extra_cards(self, exclude_cards, each_count, extra_type):
         """        
         exclude_cards -- cards to exclude from the list
         each_count -- whether the extra cards should be singles are doubles
@@ -138,9 +138,9 @@ class Hand(object):
         for play in plays:
             extra_cards = []
             if each_count == 3 and extra:
-                extra_cards = self.get_extra_cards(play.cards[0: 1], extra, 1)
+                extra_cards = self._get_extra_cards(play.cards[0: 1], extra, 1)
             elif each_count == 4 and extra:
-                extra_cards = self.get_extra_cards(play.cards[0: 1], extra // 2, 2)
+                extra_cards = self._get_extra_cards(play.cards[0: 1], extra // 2, 2)
             if extra_cards or not extra:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -203,7 +203,7 @@ class Hand(object):
         refined_plays = []
         for play in plays:
             extra_cards = []
-            extra_cards = self.get_extra_cards(play.cards[2: 4], num_extra // 2, 2)
+            extra_cards = self._get_extra_cards(play.cards[2: 4], num_extra // 2, 2)
             if not num_extra or extra_cards:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)

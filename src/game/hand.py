@@ -92,7 +92,7 @@ class Hand(object):
         if extra_type != 1 and extra_type != 2:
             return []
         extra_cards = []
-        exclude_values = [c.value for c in exclude_cards]
+        exclude_values = set([c.value for c in exclude_cards])
         possible_cards = []
         for card_group in self._categories[CATEGORIES[each_count - 1]]:
             if card_group[0].value not in exclude_values:
@@ -138,9 +138,9 @@ class Hand(object):
         for play in plays:
             extra_cards = []
             if each_count == 3 and extra:
-                extra_cards = self._get_extra_cards(play.cards[0: 1], extra, 1)
+                extra_cards = self._get_extra_cards(play.cards, extra, 1)
             elif each_count == 4 and extra:
-                extra_cards = self._get_extra_cards(play.cards[0: 1], extra // 2, 2)
+                extra_cards = self._get_extra_cards(play.cards, extra // 2, 2)
             if extra_cards or not extra:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -203,7 +203,7 @@ class Hand(object):
         refined_plays = []
         for play in plays:
             extra_cards = []
-            extra_cards = self._get_extra_cards(play.cards[2: 4], num_extra // 2, 2)
+            extra_cards = self._get_extra_cards(play.cards, num_extra // 2, 2)
             if not num_extra or extra_cards:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)

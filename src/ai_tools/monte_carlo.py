@@ -148,6 +148,17 @@ def _get_single_best_play(card_plays, player, game_state):
             best_play = play
     return best_play
 
+def _get_multiple_best_plays(card_plays, player, game_state, num_best):
+    """Gets the top { num_best } players"""
+    strengths = {}
+    for play in card_plays:
+        play.position = player.position
+        strengths[play] = estimate_play_strength(play, player, game_state)
+    ordered_plays = sorted(card_plays,
+                           key=lambda play: strengths[play],
+                           reverse=True)
+    return ordered_plays[0: num_best]
+
 def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
     if not card_plays:
@@ -157,12 +168,5 @@ def get_best_play(card_plays, player, game_state, num_best=1):
     player = Player(player.hand, player.position, player.type)
     if num_best == 1:
         return _get_single_best_play(card_plays, player, game_state)
-    
-    strengths = {}
-    for play in card_plays:
-        play.position = player.position
-        strengths[play] = estimate_play_strength(play, player, game_state)
-    ordered_plays = sorted(card_plays,
-                           key=lambda play: strengths[play],
-                           reverse=True)
-    return ordered_plays[0: num_best]
+    else:
+        return _get_multiple_best_plays(card_plays, player, game_state, num_best)

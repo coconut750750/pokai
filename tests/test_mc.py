@@ -18,9 +18,6 @@ class TestMC(object):
 
     @classmethod
     def setup_class(cls):
-        """ setup any state specific to the execution of the given class (which
-        usually contains tests).
-        """
         cls.card_strs_lv1 = ['7h', '6h', '0d', '3s', '6s', 'Js', '7d', '9c', 'Ac',
                              'Kd', '5h', '2H', '5C', '0C', '0H', '4D', 'KH']
         cls.card_strs_lv2 = ['3h', '4s', '4h', '5d', '6s', '7c', '9h', '9d', '0c',
@@ -31,27 +28,19 @@ class TestMC(object):
                              'AC', 'KH', 'KS', 'KD', 'KC', 'QH', 'QD', 'QS']
 
     def setup_method(self):
-        """ setup any state tied to the execution of the given method in a
-        class.  setup_method is invoked for every test method of a class.
-        """
-        hand_lv1 = Hand([])
-        hand_lv1.add_cards(card_strs=TestMC.card_strs_lv1)
+        hand_lv1 = Hand(Card.strs_to_cards(TestMC.card_strs_lv1))
         self.test_player_lv1 = Player(hand_lv1, 0, "")
 
-        hand_lv2 = Hand([])
-        hand_lv2.add_cards(card_strs=TestMC.card_strs_lv2)
+        hand_lv2 = Hand(Card.strs_to_cards(TestMC.card_strs_lv2))
         self.test_player_lv2 = Player(hand_lv2, 0, "")
 
-        hand_lv3 = Hand([])
-        hand_lv3.add_cards(card_strs=TestMC.card_strs_lv3)
+        hand_lv3 = Hand(Card.strs_to_cards(TestMC.card_strs_lv3))
         self.test_player_lv3 = Player(hand_lv3, 0, "")
 
-        hand_lv4 = Hand([])
-        hand_lv4.add_cards(card_strs=TestMC.card_strs_lv4)
+        hand_lv4 = Hand(Card.strs_to_cards(TestMC.card_strs_lv4))
         self.test_player_lv4 = Player(hand_lv4, 0, "")
 
         self.game_state = GameState(17, 17)
-
 
     def test_simulate_one_random(self):
         """tests the simulation of one game"""

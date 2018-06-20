@@ -15,7 +15,7 @@ class AIPlayer(Player):
     def __init__(self, hand, position, t):
         super(AIPlayer, self).__init__(hand, position, t)
 
-        """ MUTATABLE
+        """ Mutable configuration to decide lead play
         # order of lead plays
         self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, 
                       DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER]
@@ -35,8 +35,6 @@ class AIPlayer(Player):
             self._straight_diff = 1
         # the greater it is, the earlier player will bomb, use ace, use two
         self.bomb_threshold = 5
-        self.use_ace_threshold = 5
-        self.use_two_threshold = 5
         """
 
     def get_play(self, game_state):
@@ -74,14 +72,16 @@ class AIPlayer(Player):
         return get_best_play(possible_plays, self, game_state, num_best=num_best)
 
     def _get_best_triple_extra(self, game_state, base_play):
+        num_triples = base_play.num_base_cards() // 3
         prev_play = game_state.prev_play
-        possible_extras = self.hand.get_possible_basics(None, prev_play.num_extra)
-        possible_plays = []
-        for extra in possible_extras:
-            if extra.cards[0].value != base_play.cards[0].value:
-                possible_plays.append(Play(self.position, base_play.cards + extra.cards, prev_play.num_extra, prev_play.play_type))
-        best_extra = get_best_play(possible_plays, self, game_state)
-        return best_extra
+        extra_each_count = prev_play.num_extra // num_triples
+        exclude_cards = [base_play.cards[0]]
+        if num_triples == 2:
+            exclude_cards.append(base_play.cards[3])
+        possible_extras = self.hand.get_possible_extra_cards(exclude_cards, extra_each_count, num_triples)
+        possible_plays = [Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type)\
+                          for extra in possible_extras]
+        return get_best_play(possible_plays, self, game_state)
 
     def get_best_singles(self, game_state, exclude_cards=None, num_best=1):
         return self._get_best_singular_basic(game_state, 1, exclude_cards, num_best)
@@ -110,6 +110,13 @@ class AIPlayer(Player):
         return self._get_best_singular_straight(game_state, 2)
 
     def get_best_adj_triples(self, game_state):
+        prev_play = game_state.prev_play
+        best_play = self._get_best_singular_straight(game_state, 3)
+        if prev_play and prev_play.num_extra:
+            return self._get_best_triple_extra(game_state, best_play)
+        return best_play
+
+    def get_best_quad(self, game_state):
         pass
 
     def get_best_wild(self, game_state):

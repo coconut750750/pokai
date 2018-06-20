@@ -72,17 +72,13 @@ class AIPlayer(Player):
         return get_best_play(possible_plays, self, game_state, num_best=num_best)
 
     def _get_best_triple_extra(self, game_state, base_play):
+        num_triples = base_play.num_base_cards() // 3
         prev_play = game_state.prev_play
-        num_extra = prev_play.num_extra
-        possible_extras = self.hand.get_possible_extra_cards(base_play.cards[0: 1], num_extra, 1)
-        possible_plays = [Play(self.position, base_play.cards + extra, num_extra, prev_play.play_type)\
-                          for extra in possible_extras]
-        return get_best_play(possible_plays, self, game_state)
-
-    def _get_best_adj_triple_extra(self, game_state, base_play):
-        prev_play = game_state.prev_play
-        extra_each_count = prev_play.num_extra // 2
-        possible_extras = self.hand.get_possible_extra_cards(base_play.cards[2: 4], extra_each_count, 2)
+        extra_each_count = prev_play.num_extra // num_triples
+        exclude_cards = [base_play.cards[0]]
+        if num_triples == 2:
+            exclude_cards.append(base_play.cards[3])
+        possible_extras = self.hand.get_possible_extra_cards(exclude_cards, extra_each_count, num_triples)
         possible_plays = [Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type)\
                           for extra in possible_extras]
         return get_best_play(possible_plays, self, game_state)
@@ -117,7 +113,7 @@ class AIPlayer(Player):
         prev_play = game_state.prev_play
         best_play = self._get_best_singular_straight(game_state, 3)
         if prev_play and prev_play.num_extra:
-            return self._get_best_adj_triple_extra(game_state, best_play)
+            return self._get_best_triple_extra(game_state, best_play)
         return best_play
 
     def get_best_quad(self, game_state):

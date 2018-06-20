@@ -143,4 +143,3 @@ class TestAIPlayer:
         assert best_play.cards[6] == Card('7', 'h')
         assert best_play.cards[7] == Card('0', 'h')
         _check_adj_triple(best_play.cards, 2)
-

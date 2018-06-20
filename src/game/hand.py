@@ -82,14 +82,14 @@ class Hand(object):
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
             self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
 
-    def get_possible_extra_cards(self, exclude_cards, each_count, num_extra, max=-1):
+    def get_possible_extra_cards(self, exclude_cards, each_count, extra_type, max=-1):
         """
         Gets all possible extra card combinations
         exclude_cards -- cards to exclude from the list
         each_count -- whether the extra cards should be singles are doubles
-        num_extra -- how many extra groups to return
+        extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
         """
-        if num_extra != 1 and num_extra != 2:
+        if extra_type != 1 and extra_type != 2:
             return []
         extra_cards = []
         exclude_values = [c.value for c in exclude_cards]
@@ -97,20 +97,20 @@ class Hand(object):
         for card_group in self._categories[CATEGORIES[each_count - 1]]:
             if card_group[0].value not in exclude_values:
                 possible_cards.append(card_group)
-        for possible_tuple in combinations(possible_cards, num_extra):
+        for possible_tuple in combinations(possible_cards, extra_type):
             extra_cards.append(list(chain.from_iterable(possible_tuple)))
             max -= 1
             if not max:
                 break
         return extra_cards
 
-    def get_extra_cards(self, exclude_cards, each_count, num_extra):
+    def get_extra_cards(self, exclude_cards, each_count, extra_type):
         """        
         exclude_cards -- cards to exclude from the list
         each_count -- whether the extra cards should be singles are doubles
-        num_extra -- how many extra groups to return
+        extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
         """
-        extra = self.get_possible_extra_cards(exclude_cards, each_count, num_extra, max=1)
+        extra = self.get_possible_extra_cards(exclude_cards, each_count, extra_type, max=1)
         return extra[0] if extra else []
 
     def get_possible_low_foundations(self, other_card, play_type, max=-1):
@@ -138,9 +138,9 @@ class Hand(object):
         for play in plays:
             extra_cards = []
             if each_count == 3 and extra:
-                extra_cards = self.get_extra_cards(play.cards[: 1], extra, 1)
+                extra_cards = self.get_extra_cards(play.cards[0: 1], extra, 1)
             elif each_count == 4 and extra:
-                extra_cards = self.get_extra_cards(play.cards[: 1], extra // 2, 2)
+                extra_cards = self.get_extra_cards(play.cards[0: 1], extra // 2, 2)
             if extra_cards or not extra:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -203,7 +203,7 @@ class Hand(object):
         refined_plays = []
         for play in plays:
             extra_cards = []
-            extra_cards = self.get_extra_cards(play.cards[2:4], num_extra // 2, 2)
+            extra_cards = self.get_extra_cards(play.cards[2: 4], num_extra // 2, 2)
             if not num_extra or extra_cards:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)

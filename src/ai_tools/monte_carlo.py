@@ -11,7 +11,7 @@ from pokai.src.game.game_tools import *
 from pokai.src.game.hand import Hand
 from pokai.src.game.player import Player
 
-SIMULATIONS = 500
+SIMULATIONS = 1000
 
 def simulate_one_game(players, game_state, display):
     """

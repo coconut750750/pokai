@@ -73,12 +73,19 @@ class AIPlayer(Player):
 
     def _get_best_triple_extra(self, game_state, base_play):
         prev_play = game_state.prev_play
-        possible_extras = self.hand.get_possible_extra_cards([base_play.get_base_card()], prev_play.num_extra, 1)
-        possible_plays = []
-        for extra in possible_extras:
-            possible_plays.append(Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type))
-        best_extra = get_best_play(possible_plays, self, game_state)
-        return best_extra
+        num_extra = prev_play.num_extra
+        possible_extras = self.hand.get_possible_extra_cards(base_play.cards[0: 1], num_extra, 1)
+        possible_plays = [Play(self.position, base_play.cards + extra, num_extra, prev_play.play_type)\
+                          for extra in possible_extras]
+        return get_best_play(possible_plays, self, game_state)
+
+    def _get_best_adj_triple_extra(self, game_state, base_play):
+        prev_play = game_state.prev_play
+        extra_each_count = prev_play.num_extra // 2
+        possible_extras = self.hand.get_possible_extra_cards(base_play.cards[2: 4], extra_each_count, 2)
+        possible_plays = [Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type)\
+                          for extra in possible_extras]
+        return get_best_play(possible_plays, self, game_state)
 
     def get_best_singles(self, game_state, exclude_cards=None, num_best=1):
         return self._get_best_singular_basic(game_state, 1, exclude_cards, num_best)
@@ -107,7 +114,11 @@ class AIPlayer(Player):
         return self._get_best_singular_straight(game_state, 2)
 
     def get_best_adj_triples(self, game_state):
-        pass
+        prev_play = game_state.prev_play
+        best_play = self._get_best_singular_straight(game_state, 3)
+        if prev_play and prev_play.num_extra:
+            return self._get_best_adj_triple_extra(game_state, best_play)
+        return best_play
 
     def get_best_quad(self, game_state):
         pass

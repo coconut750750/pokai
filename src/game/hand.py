@@ -3,7 +3,7 @@ Hand module
 Contains the Hand class and other constants
 """
 
-from itertools import groupby
+from itertools import groupby, combinations, chain
 
 from pokai.src.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
@@ -82,30 +82,38 @@ class Hand(object):
         if SMALL_JOKER_VALUE in counts and BIG_JOKER_VALUE in counts:
             self._categories[DOUBLE_JOKER].append([self._cards[-1], self._cards[-2]])
 
-    def _get_possible_extra_cards(self, exclude_cards, each_count, num_extra):
+    def get_possible_extra_cards(self, exclude_cards, each_count, extra_type, max=-1):
         """
-        Gets all possible extra cards
-        
+        Gets all possible extra card combinations
         exclude_cards -- cards to exclude from the list
         each_count -- whether the extra cards should be singles are doubles
-        num_extra -- how many extra groups to return
+        extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
         """
-        if num_extra != 1 and num_extra != 2:
+        if extra_type != 1 and extra_type != 2:
             return []
         extra_cards = []
-        index = 0
-        possible_cards = self._categories[CATEGORIES[each_count - 1]]
-        while num_extra > 0 and index < len(possible_cards):
-            if possible_cards[index][0] not in exclude_cards:
-                extra_cards += possible_cards[index]
-                num_extra -= 1
-            index += 1
-        if num_extra == 0:
-            return extra_cards
-        else:
-            return []
+        exclude_values = [c.value for c in exclude_cards]
+        possible_cards = []
+        for card_group in self._categories[CATEGORIES[each_count - 1]]:
+            if card_group[0].value not in exclude_values:
+                possible_cards.append(card_group)
+        for possible_tuple in combinations(possible_cards, extra_type):
+            extra_cards.append(list(chain.from_iterable(possible_tuple)))
+            max -= 1
+            if not max:
+                break
+        return extra_cards
 
-    def _get_possible_low_foundations(self, other_card, play_type, max=-1):
+    def get_extra_cards(self, exclude_cards, each_count, extra_type):
+        """        
+        exclude_cards -- cards to exclude from the list
+        each_count -- whether the extra cards should be singles are doubles
+        extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
+        """
+        extra = self.get_possible_extra_cards(exclude_cards, each_count, extra_type, max=1)
+        return extra[0] if extra else []
+
+    def get_possible_low_foundations(self, other_card, play_type, max=-1):
         possibles = []
         for card_group in self._categories[play_type]:
             card = card_group[0]
@@ -125,14 +133,14 @@ class Hand(object):
         if each_count < 3:
             extra = 0
 
-        plays = self._get_possible_low_foundations(other_card, CATEGORIES[each_count - 1], max=max)
+        plays = self.get_possible_low_foundations(other_card, CATEGORIES[each_count - 1], max=max)
         refined_plays = []
         for play in plays:
             extra_cards = []
             if each_count == 3 and extra:
-                extra_cards = self._get_possible_extra_cards(play.cards, extra, 1)
+                extra_cards = self.get_extra_cards(play.cards[0: 1], extra, 1)
             elif each_count == 4 and extra:
-                extra_cards = self._get_possible_extra_cards(play.cards, extra // 2, 2)
+                extra_cards = self.get_extra_cards(play.cards[0: 1], extra // 2, 2)
             if extra_cards or not extra:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -150,9 +158,7 @@ class Hand(object):
         Returns the lowest play with pos -1 or None
         """
         possible = self.get_possible_basics(other_card, each_count, extra=extra, max=1)
-        if possible:
-            return possible[0]
-        return None
+        return possible[0] if possible else None
 
     def get_possible_straights(self, other_card, each_count, length, max=-1):
         """
@@ -187,9 +193,7 @@ class Hand(object):
         Returns play with pos of -1 or None
         """
         possible = self.get_possible_straights(other_card, each_count, length, max=1)
-        if possible:
-            return possible[0]
-        return None
+        return possible[0] if possible else None
 
     def get_possible_adj_triples(self, other_card, num_extra, max=-1):
         """
@@ -199,7 +203,7 @@ class Hand(object):
         refined_plays = []
         for play in plays:
             extra_cards = []
-            extra_cards = self._get_possible_extra_cards(play.cards, num_extra // 2, 2)
+            extra_cards = self.get_extra_cards(play.cards[2: 4], num_extra // 2, 2)
             if not num_extra or extra_cards:
                 play.cards += extra_cards
                 play.num_extra = len(extra_cards)
@@ -216,9 +220,7 @@ class Hand(object):
         Returns play with pos of -1 or None
         """
         possible = self.get_possible_adj_triples(other_card, num_extra, max=1)
-        if possible:
-            return possible[0]
-        return None
+        return possible[0] if possible else None
 
     def get_low_wild(self, other_card):
         """
@@ -234,7 +236,7 @@ class Hand(object):
 
     def get_low_play(self, play):
         """
-        Returns the lowest play based on other play
+        Returns the lowest play based on another play
         """
         if play.play_type == SINGLES:
             next_play = self.get_low(play.get_base_card(), 1)

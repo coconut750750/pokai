@@ -10,26 +10,28 @@ pytest test_card.py -vs
 
 import copy
 import random
+
 import pokai.src.game.card as card
 from pokai.src.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
 import pokai.src.game.hand as hand
 from pokai.src.game.game_tools import get_new_shuffled_deck, DOUBLE_JOKER
+
+from pokai.tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
+                                     _check_quadruples, _check_straight, _check_wild
 
 # if you want to run more random tests, increase
 TEST_MULTIPLIER = 1
 
 def setup_module(module):
     global cards, adj_trip, quadplex
-    card_strs = ['7h', '6h', '8d', '7s', '6s', '5s', '7d', '4c', 'Ac',
-                 'Kd', '5h', '2H', '5C', '0C', '0H', '4D', 'KH', '6d',
-                 '7c']
-    cards = card.Card.strs_to_cards(card_strs)
-    card_strs_adj_trip = ['3s', '3d', '3h', '4s', '5h', '5s', '6s', '6h', '6d',
-                          '7s', '7h', '7d', '8h', '9h', '9c']
-    adj_trip = card.Card.strs_to_cards(card_strs_adj_trip)
-    card_strs_quadplex = ['3s', '4s', '5h', '5s', '6s', '6h', '7s',
-                          '7h', '7d', '7c']
-    quadplex = card.Card.strs_to_cards(card_strs_quadplex)
+    cards = card.Card.strs_to_cards(['7h', '6h', '8d', '7s', '6s', '5s',
+                                     '7d', '4c', 'Ac', 'Kd', '5h', '2H',
+                                     '5C', '0C', '0H', '4D', 'KH', '6d', '7c'])
+    adj_trip = card.Card.strs_to_cards(['3s', '3d', '3h', '4s', '5h', '5s',
+                                        '6s', '6h', '6d', '7s', '7h', '7d',
+                                        '8h', '9h', '9c'])
+    quadplex = card.Card.strs_to_cards(['3s', '4s', '5h', '5s', '6s', '6h',
+                                        '7s', '7h', '7d', '7c'])
 
 class TestHand(object):
     """
@@ -534,96 +536,6 @@ def _print_card_list(card_play, extra_msg=""):
     # print("\nValid {} {}: {}".format(card_play.play_type,
     #                                  extra_msg,
     #                                  " ".join(str(c) for c in card_play.cards)))
-
-def _check_single(single):
-    """checks if valid single"""
-    assert single
-    assert len(single) == 1
-
-def _check_double(double):
-    """checks if valid double"""
-    assert double
-    assert len(double) == 2
-    assert double[0].value == double[1].value
-
-def _check_triple(triple):
-    """checks if triple is valid"""
-    assert triple
-    l = len(triple)
-    assert triple[0].value == triple[1].value and triple[0].value == triple[2].value
-    if l >= 4:
-        assert triple[0].value != triple[3].value
-    if l == 5:
-        assert triple[3].value == triple[4].value
-
-def _check_adj_triple(adj_trip, extras):
-    """checks if adj_trip is valid"""
-    assert adj_trip
-    l = len(adj_trip)
-    assert l == 6 + extras
-    _check_triple(adj_trip[0: 3])
-    _check_triple(adj_trip[3: 6])
-    assert adj_trip[0].value == adj_trip[3].value - 1
-    if l == 6:
-        return
-    first = 6
-    second = 7 if l == 8 else 8
-    if l == 10:
-        _check_double(adj_trip[first: second])
-        _check_double(adj_trip[second:])
-    assert adj_trip[first].value != adj_trip[second].value
-
-    assert adj_trip[0].value != adj_trip[first].value\
-        and adj_trip[0].value != adj_trip[second].value
-    assert adj_trip[3].value != adj_trip[first].value\
-        and adj_trip[3].value != adj_trip[second].value
-
-def _check_quadruples(quad):
-    """check if valid quadruple"""
-    assert quad
-    l = len(quad)
-    assert l == 4 or l == 6 or l == 8
-    assert quad[0].value == quad[1].value and\
-        quad[0].value == quad[2].value and\
-        quad[0].value == quad[3].value
-    if l == 6:
-        assert quad[4].value != quad[5].value
-        assert quad[0].value != quad[4].value
-        assert quad[0].value != quad[5].value
-    if l == 8:
-        _check_double(quad[4: 6])
-        _check_double(quad[6: 8])
-        assert quad[4].value != quad[6].value
-        assert quad[0].value != quad[4].value
-        assert quad[0].value != quad[6].value
-
-def _check_straight(straight, each_count):
-    """checks if straight is valid"""
-    assert straight
-    l = len(straight)
-    if each_count == 1:
-        assert l >= 5
-    elif each_count == 2:
-        assert l >= 6
-        assert l % 2 == 0
-    elif each_count == 3:
-        assert l >= 6
-        assert l % 3 == 0
-    for i in range(0, l - each_count, each_count):
-        assert straight[i].value == straight[i + each_count].value - 1
-        assert straight[i].value == straight[i + each_count - 1].value
-        assert straight[i].value == straight[i + each_count // 3].value
-
-def _check_wild(wild):
-    """check if wild is a wild"""
-    assert wild
-    l = len(wild)
-    assert l == 2 or l == 4
-    if l == 4:
-        _check_quadruples(wild)
-    elif l == 2:
-        assert wild[0].value == SMALL_JOKER_VALUE or wild[1].value == SMALL_JOKER_VALUE
-        assert wild[0].value == BIG_JOKER_VALUE or wild[1].value == BIG_JOKER_VALUE
 
 def _get_random_hands_with_opposing_card(num_cards_per_hand, num_hands):
         """

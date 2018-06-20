@@ -20,7 +20,7 @@ class GameState(object):
     def cards_played(self, card_play):
         """
         Called when a player plays cards
-        cards_played -- list of cards that were played
+        cards_played -- Play of cards that were played
         """
         self.discard_cards(card_play)
         self.prev_play = card_play

@@ -15,7 +15,7 @@ class AIPlayer(Player):
     def __init__(self, hand, position, t):
         super(AIPlayer, self).__init__(hand, position, t)
 
-        """ MUTATABLE
+        """ Mutable configuration to decide lead play
         # order of lead plays
         self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, 
                       DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER]
@@ -35,8 +35,6 @@ class AIPlayer(Player):
             self._straight_diff = 1
         # the greater it is, the earlier player will bomb, use ace, use two
         self.bomb_threshold = 5
-        self.use_ace_threshold = 5
-        self.use_two_threshold = 5
         """
 
     def get_play(self, game_state):
@@ -75,11 +73,10 @@ class AIPlayer(Player):
 
     def _get_best_triple_extra(self, game_state, base_play):
         prev_play = game_state.prev_play
-        possible_extras = self.hand.get_possible_basics(None, prev_play.num_extra)
+        possible_extras = self.hand.get_possible_extra_cards([base_play.get_base_card()], prev_play.num_extra, 1)
         possible_plays = []
         for extra in possible_extras:
-            if extra.cards[0].value != base_play.cards[0].value:
-                possible_plays.append(Play(self.position, base_play.cards + extra.cards, prev_play.num_extra, prev_play.play_type))
+            possible_plays.append(Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type))
         best_extra = get_best_play(possible_plays, self, game_state)
         return best_extra
 
@@ -110,6 +107,9 @@ class AIPlayer(Player):
         return self._get_best_singular_straight(game_state, 2)
 
     def get_best_adj_triples(self, game_state):
+        pass
+
+    def get_best_quad(self, game_state):
         pass
 
     def get_best_wild(self, game_state):

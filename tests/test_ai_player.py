@@ -8,7 +8,6 @@ from pokai.src.game.card import Card
 from pokai.src.game.game_state import GameState
 from pokai.src.game.card_play import Play
 from pokai.src.game.hand import Hand
-from pokai.src.game.player import Player
 from pokai.src.game.aiplayer import AIPlayer
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
@@ -26,11 +25,9 @@ class TestAIPlayer:
         
     def setup_method(self):       
         hand = Hand(Card.strs_to_cards(TestAIPlayer.card_strs_lv2))
-        self.test_player_lv2 = Player(hand, 0, "")
         self.test_ai_player_lv2 = AIPlayer(hand, 0, "")
 
         hand = Hand(Card.strs_to_cards(TestAIPlayer.card_strs_lv3))
-        self.test_player_lv3 = Player(hand, 0, "")
         self.test_ai_player_lv3 = AIPlayer(hand, 0, "")
 
         self.game_state = GameState(17, 17)

@@ -250,6 +250,8 @@ class Hand(object):
             next_play = self.get_low_straight(play.get_base_card(), 2, int(play.num_base_cards() / 2))
         elif play.play_type == ADJ_TRIPLES:
             next_play = self.get_low_adj_triple(play.get_base_card(), play.num_extra)
+        elif play.play_type == QUADRUPLES:
+            next_play = self.get_low(play.get_base_card(), 4, play.num_extra)
         else:
             next_play = self.get_low_wild(play.get_base_card())
         return next_play

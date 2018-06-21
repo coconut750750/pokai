@@ -143,6 +143,7 @@ def _get_single_best_play(card_plays, player, game_state):
     for play in card_plays:
         play.position = player.position
         strength = estimate_play_strength(play, player, game_state)
+        print(play, strength)
         if strength > best_strength:
             best_strength = strength
             best_play = play

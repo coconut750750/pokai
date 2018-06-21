@@ -55,6 +55,10 @@ class AIPlayer(Player):
         return next_play
 
     def _get_best_singular_basic(self, game_state, each_count):
+        """
+        Gets the best singluar basic play
+        each_count -- the occurance of the cards in the play
+        """
         prev_play = game_state.prev_play
         base_card = None if not prev_play else prev_play.get_base_card()
         possible_plays = self.hand.get_possible_basics(base_card, each_count)
@@ -80,6 +84,10 @@ class AIPlayer(Player):
         return get_best_play(possible_plays, self, game_state)
 
     def _get_best_singular_straight(self, game_state, each_count):
+        """
+        Gets the best straight without any extras
+        each_count -- the occurance of each card in the straight
+        """
         prev_play = game_state.prev_play
         # TODO: if prev play is None, get best possible straight length
         base_card = None if not prev_play else prev_play.get_base_card()

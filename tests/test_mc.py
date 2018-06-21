@@ -128,7 +128,4 @@ class TestMC(object):
         play1 = computer.get_play(game_state)
         game_state.prev_play = Play(2, [Card('K', 'h')], 0)
         play2 = computer.get_play(game_state)
-        a = {play2: 1}
-        print(a[play2])
         assert get_best_play([play1, play2], computer, game_state) == play2
-

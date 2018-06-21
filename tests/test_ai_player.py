@@ -57,77 +57,78 @@ class TestAIPlayer:
 
 
 
-    def test_ai_get_best_singles(self):
-        prev_play = Play(2, [Card('3', 'h')], 0, play_type=SINGLES)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv3.get_best_singles(self.game_state)
-        assert best_play.cards[0].name == 'A'
-        _check_single(best_play.cards)
+    # def test_ai_get_best_singles(self):
+    #     prev_play = Play(2, [Card('3', 'h')], 0, play_type=SINGLES)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv3.get_best_singles(self.game_state)
+    #     assert best_play.cards[0].name == 'A'
+    #     _check_single(best_play.cards)
 
-    def test_ai_get_best_singles_none(self):
-        self.setup_game_state([None])
-        best_play = self.test_ai_player_lv2.get_best_singles(self.game_state)
-        assert best_play.cards[0].name == '0'
-        _check_single(best_play.cards)
+    # def test_ai_get_best_singles_none(self):
+    #     self.setup_game_state([None])
+    #     best_play = self.test_ai_player_lv2.get_best_singles(self.game_state)
+    #     assert best_play.cards[0].name == '0'
+    #     _check_single(best_play.cards)
 
-    def test_ai_get_best_doubles(self):
-        prev_play = Play(2, [Card('0', 's'), Card('0', 'd')], 0, play_type=DOUBLES)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv2.get_best_doubles(self.game_state)
-        assert best_play.cards[0].name == 'J'
-        _check_double(best_play.cards)
+    # def test_ai_get_best_doubles(self):
+    #     prev_play = Play(2, [Card('0', 's'), Card('0', 'd')], 0, play_type=DOUBLES)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv2.get_best_doubles(self.game_state)
+    #     assert best_play.cards[0].name == 'J'
+    #     _check_double(best_play.cards)
 
-    def test_ai_get_best_doubles_none(self):
-        self.setup_game_state([None])
-        best_play = self.test_ai_player_lv2.get_best_doubles(self.game_state)
-        assert best_play.cards[0].name == '9' or best_play.cards[0].name == 'J'
-        _check_double(best_play.cards)
+    # def test_ai_get_best_doubles_none(self):
+    #     self.setup_game_state([None])
+    #     best_play = self.test_ai_player_lv2.get_best_doubles(self.game_state)
+    #     assert best_play.cards[0].name == '9' or best_play.cards[0].name == 'J'
+    #     _check_double(best_play.cards)
 
-    def test_ai_get_best_triples_alone(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c')], 0, play_type=TRIPLES)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
-        assert best_play.cards[0].name == 'Q'
-        _check_triple(best_play.cards)
+    # def test_ai_get_best_triples_alone(self):
+    #     prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c')], 0, play_type=TRIPLES)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
+    #     assert best_play.cards[0].name == 'Q'
+    #     _check_triple(best_play.cards)
 
-    def test_ai_get_best_triples_single(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
-                             Card('4', 'c')], 1, play_type=TRIPLES)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
-        assert best_play.cards[0].name == 'Q'
-        assert best_play.cards[3].name == 'A'
-        _check_triple(best_play.cards)
+    # def test_ai_get_best_triples_single(self):
+    #     prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+    #                          Card('4', 'c')], 1, play_type=TRIPLES)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
+    #     assert best_play.cards[0].name == 'Q'
+    #     assert best_play.cards[3].name == 'A'
+    #     _check_triple(best_play.cards)
 
-    def test_ai_get_best_triples_double(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
-                             Card('4', 'c'), Card('4', 'd')], 2, play_type=TRIPLES)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
-        assert best_play.cards[0].name == 'Q'
-        assert best_play.cards[3].name == '0'
-        _check_triple(best_play.cards)
+    # def test_ai_get_best_triples_double(self):
+    #     prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+    #                          Card('4', 'c'), Card('4', 'd')], 2, play_type=TRIPLES)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
+    #     assert best_play.cards[0].name == 'Q'
+    #     assert best_play.cards[3].name == '0'
+    #     _check_triple(best_play.cards)
 
-    def test_ai_get_best_single_straight(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('4', 'd'), Card('5', 'c'),
-                             Card('6', 's'), Card('7', 'd')], 0, play_type=STRAIGHTS)
-        self.setup_game_state([prev_play])
-        best_play = self.test_ai_player_lv3.get_best_straights(self.game_state)
-        assert best_play.cards[0].name == '4'
-        _check_straight(best_play.cards, 1)
+    # def test_ai_get_best_single_straight(self):
+    #     prev_play = Play(2, [Card('3', 'h'), Card('4', 'd'), Card('5', 'c'),
+    #                          Card('6', 's'), Card('7', 'd')], 0, play_type=STRAIGHTS)
+    #     self.setup_game_state([prev_play])
+    #     best_play = self.test_ai_player_lv3.get_best_straights(self.game_state)
+    #     assert best_play.cards[0].name == '4'
+    #     _check_straight(best_play.cards, 1)
 
-    def test_ai_get_best_double_straight(self):
-        card_strs = ['6h', '6c', '6s', '7s', '7d', '7c', '8d', '8h',
-                     '9H', '9D', '0H', '0S', 'Js', 'Qd', 'KD', 'KC', '2C']
-        player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('4', 'c'),
-                             Card('4', 's'), Card('5', 's'), Card('5', 'c')], 0, play_type=DOUBLE_STRAIGHTS)
-        self.setup_game_state([prev_play])
-        best_play = player.get_best_double_straights(self.game_state)
-        assert best_play.cards[0].name == '8'
-        _check_straight(best_play.cards, 2)
+    # def test_ai_get_best_double_straight(self):
+    #     card_strs = ['6h', '6c', '6s', '7s', '7d', '7c', '8d', '8h',
+    #                  '9H', '9D', '0H', '0S', 'Js', 'Qd', 'KD', 'KC', '2C']
+    #     player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
+    #     prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('4', 'c'),
+    #                          Card('4', 's'), Card('5', 's'), Card('5', 'c')], 0, play_type=DOUBLE_STRAIGHTS)
+    #     self.setup_game_state([prev_play])
+    #     best_play = player.get_best_double_straights(self.game_state)
+    #     assert best_play.cards[0].name == '8'
+    #     _check_straight(best_play.cards, 2)
 
     def test_ai_get_best_adj_triple_alone(self):
+        # should not take 777888 because need two sevens for 556677
         card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
                       '8s', '8d', '8c', '9s', '9d', '9c', '0h']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
@@ -146,17 +147,20 @@ class TestAIPlayer:
         _check_adj_triple(best_play.cards, 2)
     
     def test_ai_get_best_quad_single(self):
-        card_strs = ['5c', '6d', '6h', '6s', '7h', '7d', '7c',
-                      '7s', '8d', '9c', 'As', 'Ad', 'Ac', 'Ah']
+        # should not take 7777 because need two 7s for 667788
+        card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
+                      '7s', '8d', '8c', 'As', 'Ad', 'Ac', 'Ah']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
         prev_play1 = Play(0, [Card('2', 'd'), Card('2', 's'), Card('2', 'c')],
                           0, play_type=TRIPLES)
-        prev_play2 = Play(2, [Card('3', 's'), Card('4', 's'), Card('4', 'c'),
-                              Card('4', 'd'), Card('4', 'h'), Card('5', 'd')], 2, play_type=QUADRUPLES)
-        self.setup_game_state([prev_play1, prev_play2])
+        prev_play3 = Play(2, [Card('4', 's'), Card('4', 'c'), Card('4', 'd'),
+                              Card('4', 'h'), Card('3', 'h'), Card('3', 's'),
+                              Card('5', 'h'), Card('5', 's')], 4, play_type=QUADRUPLES)
+        self.setup_game_state([prev_play1, prev_play3])
 
         best_play = player.get_best_quad(self.game_state)
+        print(best_play)
         assert best_play.cards[0].name == 'A'
-        assert best_play.cards[4].name == '7' or best_play.cards[5].name == '7'
-        assert best_play.cards[4].name != '6' and best_play.cards[5].name != '6'
+        assert best_play.cards[4].name == '7' or best_play.cards[6].name == '7'
+        assert best_play.cards[4].name != '6' and best_play.cards[6].name != '6'
         _check_quadruples(best_play.cards)

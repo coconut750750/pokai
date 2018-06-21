@@ -128,6 +128,7 @@ class TestAIPlayer:
         _check_straight(best_play.cards, 2)
 
     def test_ai_get_best_adj_triple_alone(self):
+        # should not take 777888 because need two sevens for 556677
         card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
                       '8s', '8d', '8c', '9s', '9d', '9c', '0h']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
@@ -146,17 +147,20 @@ class TestAIPlayer:
         _check_adj_triple(best_play.cards, 2)
     
     def test_ai_get_best_quad_single(self):
-        card_strs = ['5c', '6d', '6h', '6s', '7h', '7d', '7c',
-                      '7s', '8d', '9c', 'As', 'Ad', 'Ac', 'Ah']
+        # should not take 7777 because need two 7s for 667788
+        card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
+                      '7s', '8d', '8c', 'As', 'Ad', 'Ac', 'Ah']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
         prev_play1 = Play(0, [Card('2', 'd'), Card('2', 's'), Card('2', 'c')],
                           0, play_type=TRIPLES)
-        prev_play2 = Play(2, [Card('3', 's'), Card('4', 's'), Card('4', 'c'),
-                              Card('4', 'd'), Card('4', 'h'), Card('5', 'd')], 2, play_type=QUADRUPLES)
-        self.setup_game_state([prev_play1, prev_play2])
+        prev_play3 = Play(2, [Card('4', 's'), Card('4', 'c'), Card('4', 'd'),
+                              Card('4', 'h'), Card('3', 'h'), Card('3', 's'),
+                              Card('5', 'h'), Card('5', 's')], 4, play_type=QUADRUPLES)
+        self.setup_game_state([prev_play1, prev_play3])
 
         best_play = player.get_best_quad(self.game_state)
+        print(best_play)
         assert best_play.cards[0].name == 'A'
-        assert best_play.cards[4].name == '7' or best_play.cards[5].name == '7'
-        assert best_play.cards[4].name != '6' and best_play.cards[5].name != '6'
+        assert best_play.cards[4].name == '7' or best_play.cards[6].name == '7'
+        assert best_play.cards[4].name != '6' and best_play.cards[6].name != '6'
         _check_quadruples(best_play.cards)

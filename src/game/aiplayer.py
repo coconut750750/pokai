@@ -55,9 +55,13 @@ class AIPlayer(Player):
         return next_play
 
     def _get_best_singular_basic(self, game_state, each_count):
+        """
+        Gets the best singluar basic play
+        each_count -- the occurance of the cards in the play
+        """
         prev_play = game_state.prev_play
         base_card = None if not prev_play else prev_play.get_base_card()
-        possible_plays = self.hand.get_possible_basics(base_card, each_count)
+        possible_plays = self.hand.generate_possible_basics(base_card, each_count)
         return get_best_play(possible_plays, self, game_state)
 
     def _get_best_play_with_extra(self, game_state, base_play, extra_count, extra_each_count):
@@ -74,17 +78,21 @@ class AIPlayer(Player):
         if not prev_play or not prev_play.num_extra:
             # TODO: if prev play is None, get best possible triple extras
             return base_play
-        possible_extras = self.hand.get_possible_extra_cards(base_play.cards, extra_each_count, extra_count)
+        possible_extras = self.hand.generate_possible_extra_cards(base_play.cards, extra_each_count, extra_count)
         possible_plays = [Play(self.position, base_play.cards + extra, prev_play.num_extra, prev_play.play_type)\
                           for extra in possible_extras]
         return get_best_play(possible_plays, self, game_state)
 
     def _get_best_singular_straight(self, game_state, each_count):
+        """
+        Gets the best straight without any extras
+        each_count -- the occurance of each card in the straight
+        """
         prev_play = game_state.prev_play
         # TODO: if prev play is None, get best possible straight length
         base_card = None if not prev_play else prev_play.get_base_card()
         base_length = -1 if not prev_play else prev_play.num_base_cards() // each_count
-        possible_plays = self.hand.get_possible_straights(base_card, each_count, base_length)
+        possible_plays = self.hand.generate_possible_straights(base_card, each_count, base_length)
         return get_best_play(possible_plays, self, game_state)
 
     def get_best_singles(self, game_state):

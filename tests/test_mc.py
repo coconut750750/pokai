@@ -118,7 +118,7 @@ class TestMC(object):
         play1 = computer.get_play(game_state)
         game_state.prev_play = Play(2, [Card('K', 'h')], 0)
         play2 = computer.get_play(game_state)
-        assert get_best_play([play1, play2], computer, game_state) == play2
+        assert get_best_play(iter([play1, play2]), computer, game_state) == play2
 
     def test_best_play_single_and_triple(self):
         """tests best play function"""
@@ -128,7 +128,23 @@ class TestMC(object):
         play1 = computer.get_play(game_state)
         game_state.prev_play = Play(2, [Card('K', 'h')], 0)
         play2 = computer.get_play(game_state)
-        a = {play2: 1}
-        print(a[play2])
-        assert get_best_play([play1, play2], computer, game_state) == play2
+        assert get_best_play(iter([play1, play2]), computer, game_state) == play2
+
+    def test_multiple_best_play_none(self):
+        computer_card_strs = ['3d', '3s', '3c', '4c', 'Ah']
+        unrevealed_card_strs = ['Qd', 'Qs', 'Qc', '7c', 'Kd', 'Ks', 'Kc', '8d']
+        game_state, computer = TestMC.generate_game_state(computer_card_strs, unrevealed_card_strs, 1)
+        assert not get_best_play(iter([]), computer, game_state, num_best=2)
+
+    def test_multiple_best_play(self):
+        """tests multiple best play function"""
+        computer_card_strs = ['3d', '3s', '3c', '4c', 'Ah']
+        unrevealed_card_strs = ['Qd', 'Qs', 'Qc', '7c', 'Kd', 'Ks', 'Kc', '8d']
+        game_state, computer = TestMC.generate_game_state(computer_card_strs, unrevealed_card_strs, 1)
+        play1 = computer.get_play(game_state)
+        game_state.prev_play = Play(2, [Card('K', 'h')], 0)
+        play2 = computer.get_play(game_state)
+        ordered_best_plays = get_best_play(iter([play1, play2]), computer, game_state, num_best=2)
+        assert ordered_best_plays[0] == play2
+        assert ordered_best_plays[1] == play1
 

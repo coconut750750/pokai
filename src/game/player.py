@@ -30,6 +30,7 @@ class Player(object):
         possible_leads.append(self._get_lead_triple(game_state))
         possible_leads.append(self._get_lead_basic(2, game_state))
         possible_leads.append(self._get_lead_basic(1, game_state))
+        possible_leads.append(self._get_lead_quadruple(game_state))
         possible_leads.append(self._get_lead_wild(game_state))
         possible_leads = list(filter(lambda play: play != None, possible_leads))
         return possible_leads + [None]
@@ -60,6 +61,13 @@ class Player(object):
 
     def _get_lead_straight(self, each_count, game_state):
         return self.hand.get_low_straight(None, each_count, -1)
+
+    def _get_lead_quadruple(self, game_state):
+        for i in [4, 2, 0]:
+            next_play = self.hand.get_low(None, 4, i)
+            if next_play:
+                return next_play
+        return None
 
     def _get_lead_wild(self, game_state):
         return self.hand.get_low_wild(None)

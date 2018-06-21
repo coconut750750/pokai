@@ -533,9 +533,9 @@ def _print_card_list(card_play, extra_msg=""):
     """prints out a list of cards with a message"""
     if extra_msg:
         extra_msg = "({})".format(extra_msg)
-    # print("\nValid {} {}: {}".format(card_play.play_type,
-    #                                  extra_msg,
-    #                                  " ".join(str(c) for c in card_play.cards)))
+    print("\nValid {} {}: {}".format(card_play.play_type,
+                                     extra_msg,
+                                     " ".join(str(c) for c in card_play.cards)))
 
 def _get_random_hands_with_opposing_card(num_cards_per_hand, num_hands):
         """
@@ -561,8 +561,4 @@ def _run_random_hand(plays, get_low_type, get_low_args, _checker, _checker_args)
             if c and c.value < SMALL_JOKER_VALUE:
                 assert play.get_base_card() > c
             _checker(play.cards, *_checker_args)
-            _print_card_list(play, extra_msg="greater than {}".format(str(c)))
-
-"""
-    TODO: TEST PLAYER GET LEAD PLAYS
-    """
+            #_print_card_list(play, extra_msg="greater than {}".format(str(c)))

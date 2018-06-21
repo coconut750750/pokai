@@ -28,15 +28,13 @@ class Hand(object):
         for c in cards:
             self._cards.append(c)
         self._categories = {}
-        self._sort_cards()
         self._organize()
 
-    def _sort_cards(self):
-        """Sorts the cards in order by value"""
-        self._cards.sort(key=lambda x: x.value, reverse=False)
-
     def _organize(self):
-        """Organizes the cards in categories"""
+        """
+        Sorts the cards based on value and organizes the cards in categories
+        """
+        self._cards.sort(key=lambda x: x.value, reverse=False)
         self._categories = {x:[] for x in CATEGORIES}
         counts = {value : list(c) for value, c in groupby(self._cards, lambda card: card.value)}
         self._organize_basics(counts)
@@ -84,7 +82,7 @@ class Hand(object):
 
     def generate_possible_extra_cards(self, exclude_cards, each_count, extra_type):
         """
-        Gets all possible extra card combinations
+        Returns an iterator of all possible extra card combinations
         exclude_cards -- cards to exclude from the list
         each_count -- whether the extra cards should be singles are doubles
         extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
@@ -107,12 +105,14 @@ class Hand(object):
         each_count -- whether the extra cards should be singles are doubles
         extra_type -- (1 or 2) the groupings of the extra cards (1 or 2 singles or doubles)
         """
-        extras = self.generate_possible_extra_cards(exclude_cards, each_count, extra_type)
-        for extra in extras:
-            return extra
-        return []
+        iterator = self.generate_possible_extra_cards(exclude_cards, each_count, extra_type)
+        return next(iterator, [])
 
     def generate_possible_low_foundations(self, other_card, play_type):
+        """
+        Returns an iterator of all basic foundations
+        (individual singles, doubles, triples, or quadruples)
+        """
         possibles = []
         for card_group in self._categories[play_type]:
             card = card_group[0]
@@ -121,7 +121,7 @@ class Hand(object):
 
     def generate_possible_basics(self, other_card, each_count, extra=0):
         """
-        Get all the possible basic plays
+        Returns an iterator of all the possible basic plays
         """
         if each_count > 4:
             return None
@@ -150,14 +150,12 @@ class Hand(object):
                                            (2 or 4 for quad)
         Returns the lowest play with pos -1 or None
         """
-        possible = self.generate_possible_basics(other_card, each_count, extra=extra)
-        for pos in possible:
-            return pos
-        return None
+        iterator = self.generate_possible_basics(other_card, each_count, extra=extra)
+        return next(iterator, None)
 
     def generate_possible_straights(self, other_card, each_count, length):
         """
-        Gets all the possible straights
+        Returns an iterator of all the possible straights
         length = each_count * distinct number of cards
         """
         play_type = CATEGORIES[4 + each_count - 1]
@@ -181,14 +179,12 @@ class Hand(object):
 
         Returns play with pos of -1 or None
         """
-        possible = self.generate_possible_straights(other_card, each_count, length)
-        for pos in possible:
-            return pos
-        return None
+        iterator = self.generate_possible_straights(other_card, each_count, length)
+        return next(iterator, None)
 
     def generate_possible_adj_triples(self, other_card, num_extra):
         """
-        Gets all the possible adj triples
+        Returns an iterator of all the possible adj triples
         """
         plays = self.generate_possible_straights(other_card, 3, 2)
         for play in plays:
@@ -208,44 +204,24 @@ class Hand(object):
                        4 if it carries 2 doubles
         Returns play with pos of -1 or None
         """
-        possible = self.generate_possible_adj_triples(other_card, num_extra)
-        for pos in possible:
-            return pos
-        return None
+        iterator = self.generate_possible_adj_triples(other_card, num_extra)
+        return next(iterator, None)
+
+    def generate_possible_wilds(self, other_card):
+        """
+        Returns an iterator of all the possible wilds
+        """
+        yield from self.generate_possible_basics(other_card, 4)
+        if self._categories[DOUBLE_JOKER]:
+            yield Play(-1, self._categories[DOUBLE_JOKER][0], 0, play_type=DOUBLE_JOKER)
 
     def get_low_wild(self, other_card):
         """
         Returns the lowest wild play that is above given card
         Pos of the play is -1
         """
-        lowest_four = self.get_low(other_card, 4)
-        if lowest_four:
-            return Play(-1, lowest_four.cards, 0, play_type=QUADRUPLES)
-        if self._categories[DOUBLE_JOKER]:
-            return Play(-1, self._categories[DOUBLE_JOKER][0], 0, play_type=DOUBLE_JOKER)
-        return None
-
-    def get_low_play(self, play):
-        """
-        Returns the lowest play based on another play
-        """
-        if play.play_type == SINGLES:
-            next_play = self.get_low(play.get_base_card(), 1)
-        elif play.play_type == DOUBLES:
-            next_play = self.get_low(play.get_base_card(), 2)
-        elif play.play_type == TRIPLES:
-            next_play = self.get_low(play.get_base_card(), 3, play.num_extra)
-        elif play.play_type == STRAIGHTS:
-            next_play = self.get_low_straight(play.get_base_card(), 1, play.num_base_cards())
-        elif play.play_type == DOUBLE_STRAIGHTS:
-            next_play = self.get_low_straight(play.get_base_card(), 2, int(play.num_base_cards() / 2))
-        elif play.play_type == ADJ_TRIPLES:
-            next_play = self.get_low_adj_triple(play.get_base_card(), play.num_extra)
-        elif play.play_type == QUADRUPLES:
-            next_play = self.get_low(play.get_base_card(), 4, play.num_extra)
-        else:
-            next_play = self.get_low_wild(play.get_base_card())
-        return next_play
+        iterator = self.generate_possible_wilds(other_card)
+        return next(iterator, None)
 
     def get_num_wild(self):
         """
@@ -255,16 +231,15 @@ class Hand(object):
 
     def add_cards(self, cards=None, card_strs=None):
         """adds a list of cards or list of string of cards to hand"""
-        if not cards:
-            cards = []
-        if not card_strs:
-            card_strs = []
-        for c in cards:
-            self._add(c)
-        for card_str in card_strs:
-            self._add(Card.str_to_card(card_str))
-        self._sort_cards()
-        self._organize()
+        did_add = cards or card_strs
+        if cards:
+            for c in cards:
+                self._add(c)
+        if card_strs:
+            for card_str in card_strs:
+                self._add(Card.str_to_card(card_str))
+        if did_add:
+            self._organize()
 
     def _add(self, card):
         if card.value > -1 and not self.contains(card):

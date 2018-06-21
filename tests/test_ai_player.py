@@ -12,7 +12,6 @@ from pokai.src.game.player import Player
 from pokai.src.game.aiplayer import AIPlayer
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
-from pokai.src.ai_tools.monte_carlo import simulate, simulate_multiprocesses
 
 from pokai.tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
                                      _check_quadruples, _check_straight, _check_wild
@@ -183,17 +182,3 @@ class TestAIPlayer:
         best_play = player.get_best_wild(self.game_state)
         assert best_play.get_base_card().name == 'A'
         _check_quadruples(best_play.cards)
-
-    def test_ai_vs_player_lv2(self):
-        self.initial_game_state = deepcopy(self.game_state)
-        self.game_state_is_setup = True
-        player_wins = simulate_multiprocesses(self.test_player_lv2, 100, self.game_state, 4)
-        ai_wins = simulate(self.test_ai_player_lv2, 100, self.game_state, display_progress_only=True)
-        print(player_wins, ai_wins)
-
-    def test_ai_vs_player_lv3(self):
-        self.initial_game_state = deepcopy(self.game_state)
-        self.game_state_is_setup = True
-        player_wins = simulate_multiprocesses(self.test_player_lv3, 100, self.game_state, 4)
-        ai_wins = simulate(self.test_ai_player_lv3, 100, self.game_state, display_progress_only=True)
-        print(player_wins, ai_wins)

@@ -35,7 +35,7 @@ class Player(object):
         possible_leads = list(filter(lambda play: play != None, possible_leads))
         return possible_leads + [None]
 
-    def _get_lead_play(self, game_state):
+    def get_best_lead_play(self, game_state):
         """
         Gets the best play if this player is starting.
         Returns lead play
@@ -72,7 +72,7 @@ class Player(object):
     def _get_lead_wild(self, game_state):
         return self.hand.get_low_wild(None)
 
-    def get_play(self, game_state):
+    def get_best_play(self, game_state):
         """
         Returns lowest play of play_type
         """
@@ -80,9 +80,24 @@ class Player(object):
         unrevealed_cards = []
         if not prev_play or prev_play.position == self.position:
             # lead play
-            next_play = self._get_lead_play(game_state)
+            next_play = self.get_best_lead_play(game_state)
         else:
-            next_play = self.hand.get_low_play(prev_play)
+            if prev_play.play_type == SINGLES:
+                next_play = self.get_best_singles(game_state)
+            elif prev_play.play_type == DOUBLES:
+                next_play = self.get_best_doubles(game_state)
+            elif prev_play.play_type == TRIPLES:
+                next_play = self.get_best_triples(game_state)
+            elif prev_play.play_type == STRAIGHTS:
+                next_play = self.get_best_straights(game_state)
+            elif prev_play.play_type == DOUBLE_STRAIGHTS:
+                next_play = self.get_best_double_straights(game_state)
+            elif prev_play.play_type == ADJ_TRIPLES:
+                next_play = self.get_best_adj_triples(game_state)
+            elif prev_play.play_type == QUADRUPLES:
+                next_play = self.get_best_quad(game_state)
+            else:
+                next_play = self.get_best_wild(game_state)
             # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
             # play wilds
             if not next_play and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
@@ -91,6 +106,35 @@ class Player(object):
         if next_play:
             next_play.position = self.position
         return next_play
+
+    def get_best_singles(self, game_state):
+        return self.hand.get_low(game_state.get_prev_base_card(), 1)
+
+    def get_best_doubles(self, game_state):
+        return self.hand.get_low(game_state.get_prev_base_card(), 2)
+
+    def get_best_triples(self, game_state):
+        prev_play = game_state.prev_play
+        return self.hand.get_low(prev_play.get_base_card(), 3, prev_play.num_extra)
+
+    def get_best_straights(self, game_state):
+        prev_play = game_state.prev_play
+        return self.hand.get_low_straight(prev_play.get_base_card(), 1, prev_play.num_base_cards())
+
+    def get_best_double_straights(self, game_state):
+        prev_play = game_state.prev_play
+        return self.hand.get_low_straight(prev_play.get_base_card(), 2, prev_play.num_base_cards() // 2)
+
+    def get_best_adj_triples(self, game_state):
+        prev_play = game_state.prev_play
+        return self.hand.get_low_adj_triple(prev_play.get_base_card(), prev_play.num_extra)
+
+    def get_best_quad(self, game_state):
+        prev_play = game_state.prev_play
+        return self.hand.get_low(prev_play.get_base_card(), 4, prev_play.num_extra)
+
+    def get_best_wild(self, game_state):
+        return self.hand.get_low_wild(game_state.get_prev_base_card())
 
     def play(self, card_play, display=False):
         self.hand.remove_cards(card_play.cards)

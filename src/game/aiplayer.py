@@ -37,23 +37,6 @@ class AIPlayer(Player):
         self.bomb_threshold = 5
         """
 
-    def get_play(self, game_state):
-        prev_play = game_state.prev_play
-        unrevealed_cards = []
-        if not prev_play or prev_play.position == self.position:
-            # lead play
-            next_play = self._get_lead_play(game_state)
-        else:
-            next_play = self.hand.get_low_play(prev_play)
-            # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
-            # play wilds
-            if not next_play and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
-                next_play = self.hand.get_low_wild(None)
-
-        if next_play:
-            next_play.position = self.position
-        return next_play
-
     def _get_best_singular_basic(self, game_state, each_count):
         """
         Gets the best singluar basic play
@@ -103,6 +86,8 @@ class AIPlayer(Player):
 
     def get_best_triples(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 3)
+        if not best_play:
+            return None
         extra_each_count = game_state.prev_play.num_extra
         return self._get_best_play_with_extra(game_state, best_play, 1, extra_each_count)
 
@@ -114,13 +99,20 @@ class AIPlayer(Player):
 
     def get_best_adj_triples(self, game_state):
         best_play = self._get_best_singular_straight(game_state, 3)
+        if not best_play:
+            return None
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
     def get_best_quad(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 4)
+        if not best_play:
+            return None
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
     def get_best_wild(self, game_state):
-        pass
+        prev_play = game_state.prev_play
+        base_card = None if not prev_play else prev_play.get_base_card()
+        possible_plays = self.hand.generate_possible_wilds(base_card)
+        return get_best_play(possible_plays, self, game_state)

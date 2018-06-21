@@ -17,6 +17,9 @@ class GameState(object):
         self.current_turn = self.player_cards.index(20)
         self.prev_play = None
 
+    def get_prev_base_card(self):
+        return self.prev_play.get_base_card()
+
     def cards_played(self, card_play):
         """
         Called when a player plays cards

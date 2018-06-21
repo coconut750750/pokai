@@ -11,7 +11,7 @@ from pokai.src.game.game_tools import *
 from pokai.src.game.hand import Hand
 from pokai.src.game.player import Player
 
-SIMULATIONS = 1000
+ESTIMATION_SIMULATIONS = 1000
 
 def simulate_one_game(players, game_state, display):
     """
@@ -32,7 +32,7 @@ def simulate_one_game(players, game_state, display):
 
     while not game_is_over(players):
         turn = game_state_sim.get_current_turn()
-        next_play = players[turn].get_play(game_state_sim)
+        next_play = players[turn].get_best_play(game_state_sim)
 
         if next_play:
             players[turn].play(next_play)
@@ -63,7 +63,7 @@ def simulate_one_random_game(player, game_state, display):
 
     return simulate_one_game([player, player1, player2], game_state, display)
 
-def simulate(player, n_games, game_state, display=False):
+def simulate(player, n_games, game_state, display_progress_only=False, display=False):
     """
     Simulates n games with:
     player -- the player object
@@ -73,7 +73,7 @@ def simulate(player, n_games, game_state, display=False):
     """
     wins = 0
     for count in range(n_games):
-        if display:
+        if display or display_progress_only:
             print("Simulation {}".format(count))
         player_sim = deepcopy(player)
         if simulate_one_random_game(player_sim, game_state, display=display):
@@ -101,6 +101,10 @@ def simulate_multiprocesses(player, n_games, game_state, n_processes):
     n_processes -- number of processes
     Returns number of wins
     """
+    # should only use multiprocesses when simulating player
+    # ai uses multiple processes behind the scenes when determining play strengths
+    assert type(player) == Player
+    
     manager = multiprocessing.Manager()
     return_list = manager.list([0] * n_processes)
 
@@ -124,7 +128,7 @@ def estimate_hand_strength(player, game_state):
     player -- the player object
     game_state -- game information
     """
-    return simulate_multiprocesses(player, SIMULATIONS, game_state, 4) / SIMULATIONS
+    return simulate_multiprocesses(player, ESTIMATION_SIMULATIONS, game_state, 4) / ESTIMATION_SIMULATIONS
 
 def estimate_play_strength(card_play, player, game_state):
     """Estimates play strength"""
@@ -138,6 +142,8 @@ def estimate_play_strength(card_play, player, game_state):
 
 def _get_single_best_play(card_plays, player, game_state):
     """Gets the best play optimized for returning only one play"""
+    if len(card_plays) == 1:
+        return card_plays[0]
     best_play = None
     best_strength = -1
     for play in card_plays:
@@ -150,21 +156,14 @@ def _get_single_best_play(card_plays, player, game_state):
 
 def _get_multiple_best_plays(card_plays, player, game_state, num_best):
     """Gets the top { num_best } players"""
-    strengths = {}
-    for play in card_plays:
-        play.position = player.position
-        strengths[play] = estimate_play_strength(play, player, game_state)
     ordered_plays = sorted(card_plays,
-                           key=lambda play: strengths[play],
+                           key=lambda play: estimate_play_strength(play, player, game_state),
                            reverse=True)
     return ordered_plays[0: num_best]
 
 def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
-    if not card_plays:
-        return None
-    if len(card_plays) == 1:
-        return card_plays[0]
+    card_plays = list(card_plays)
     player = Player(player.hand, player.position, player.type)
     if num_best == 1:
         return _get_single_best_play(card_plays, player, game_state)

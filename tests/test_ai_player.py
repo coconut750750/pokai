@@ -12,6 +12,7 @@ from pokai.src.game.player import Player
 from pokai.src.game.aiplayer import AIPlayer
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from pokai.src.ai_tools.monte_carlo import simulate, simulate_multiprocesses
 
 from pokai.tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
                                      _check_quadruples, _check_straight, _check_wild
@@ -44,6 +45,11 @@ class TestAIPlayer:
     def generate_ai_from_card_strs(card_strs):
         hand = Hand(Card.strs_to_cards(card_strs))
         return AIPlayer(hand, 0, "")
+
+    @staticmethod
+    def generate_player_from_card_strs(card_strs):
+        hand = Hand(Card.strs_to_cards(card_strs))
+        return Player(hand, 0, "")
 
     def setup_game_state(self, plays):
         for play in plays:
@@ -128,6 +134,7 @@ class TestAIPlayer:
         _check_straight(best_play.cards, 2)
 
     def test_ai_get_best_adj_triple_alone(self):
+        # should not take 777888 because need two sevens for 556677
         card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
                       '8s', '8d', '8c', '9s', '9d', '9c', '0h']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
@@ -146,17 +153,47 @@ class TestAIPlayer:
         _check_adj_triple(best_play.cards, 2)
     
     def test_ai_get_best_quad_single(self):
-        card_strs = ['5c', '6d', '6h', '6s', '7h', '7d', '7c',
-                      '7s', '8d', '9c', 'As', 'Ad', 'Ac', 'Ah']
+        # should not take 7777 because need two 7s for 667788
+        card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
+                      '7s', '8d', '8c', 'As', 'Ad', 'Ac', 'Ah']
         player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
         prev_play1 = Play(0, [Card('2', 'd'), Card('2', 's'), Card('2', 'c')],
                           0, play_type=TRIPLES)
-        prev_play2 = Play(2, [Card('3', 's'), Card('4', 's'), Card('4', 'c'),
-                              Card('4', 'd'), Card('4', 'h'), Card('5', 'd')], 2, play_type=QUADRUPLES)
+        prev_play2 = Play(2, [Card('4', 's'), Card('4', 'c'), Card('4', 'd'),
+                              Card('4', 'h'), Card('3', 'h'), Card('3', 's'),
+                              Card('5', 'h'), Card('5', 's')], 4, play_type=QUADRUPLES)
         self.setup_game_state([prev_play1, prev_play2])
 
         best_play = player.get_best_quad(self.game_state)
         assert best_play.cards[0].name == 'A'
-        assert best_play.cards[4].name == '7' or best_play.cards[5].name == '7'
-        assert best_play.cards[4].name != '6' and best_play.cards[5].name != '6'
+        assert best_play.cards[4].name == '7' or best_play.cards[6].name == '7'
+        assert best_play.cards[4].name != '6' and best_play.cards[6].name != '6'
         _check_quadruples(best_play.cards)
+
+    def test_ai_get_best_wild(self):
+        card_strs = ['5c', '5d', '6h', '6s', '7h', '7d', '7c',
+                      '7s', '8d', '8c', 'As', 'Ad', 'Ac', 'Ah', 'Z0', 'Z1']
+        player = TestAIPlayer.generate_ai_from_card_strs(card_strs)
+        prev_play1 = Play(0, [Card('2', 'd')],
+                          0, play_type=SINGLES)
+        prev_play2 = Play(2, [Card('4', 's'), Card('4', 'c'), Card('4', 'd'),
+                              Card('4', 'h')], 0, play_type=QUADRUPLES)
+        self.setup_game_state([prev_play1, prev_play2])
+
+        best_play = player.get_best_wild(self.game_state)
+        assert best_play.get_base_card().name == 'A'
+        _check_quadruples(best_play.cards)
+
+    def test_ai_vs_player_lv2(self):
+        self.initial_game_state = deepcopy(self.game_state)
+        self.game_state_is_setup = True
+        player_wins = simulate_multiprocesses(self.test_player_lv2, 100, self.game_state, 4)
+        ai_wins = simulate(self.test_ai_player_lv2, 100, self.game_state, display_progress_only=True)
+        print(player_wins, ai_wins)
+
+    def test_ai_vs_player_lv3(self):
+        self.initial_game_state = deepcopy(self.game_state)
+        self.game_state_is_setup = True
+        player_wins = simulate_multiprocesses(self.test_player_lv3, 100, self.game_state, 4)
+        ai_wins = simulate(self.test_ai_player_lv3, 100, self.game_state, display_progress_only=True)
+        print(player_wins, ai_wins)

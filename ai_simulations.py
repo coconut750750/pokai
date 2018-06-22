@@ -42,7 +42,7 @@ def setup_game(card_strs):
 def simulate_ai_with_cards(card_strs):
     aiplayer, player, game_state = setup_game(card_strs)
     player_wins = simulate_multiprocesses(player, 100, game_state, 4)
-    ai_wins = simulate(aiplayer, 100, game_state)
+    ai_wins = simulate(aiplayer, 100, game_state, display_progress_only=True)
     return ai_wins, player_wins
 
 def main(hand):

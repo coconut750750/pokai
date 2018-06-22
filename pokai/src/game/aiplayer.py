@@ -4,10 +4,12 @@ AIPlayer module with AIPlayer class
 
 from copy import deepcopy
 
-from pokai.src.ai_tools.monte_carlo import get_best_play, estimate_play_strength
+from pokai.src.ai_tools.monte_carlo import get_best_play, estimate_play_strength,\
+                                           estimate_hand_strength
 
 from pokai.src.game.card_play import Play
-from pokai.src.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
+from pokai.src.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS,\
+                                TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
 from pokai.src.game.player import Player
 
 class AIPlayer(Player):
@@ -37,6 +39,9 @@ class AIPlayer(Player):
         self.bomb_threshold = 5
         self.play_threshold = 0.66 # will only play if the best play strength > 0.66
         """
+
+    def get_hand_strength(self, game_state):
+        return estimate_hand_strength(self, game_state)
 
     def _get_best_singular_basic(self, game_state, each_count):
         """
@@ -81,9 +86,10 @@ class AIPlayer(Player):
 
     def include_pass_play(get_best_specific_play):
         def wrapper(self, game_state):
+            hand_strength = self.get_hand_strength(game_state)
             best_play = get_best_specific_play(self, game_state)
             pass_play_strength = estimate_play_strength(None, self, game_state)
-            print(best_play, best_play.strength, pass_play_strength)
+            print("\n original: {0:.3f}\tbest play: {1:.3f}\tpass play: {2:.3f}".format(hand_strength, best_play.strength, pass_play_strength))
             return best_play
         return wrapper
 

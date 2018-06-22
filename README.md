@@ -27,8 +27,10 @@ Before using, you must list the cards that are taken by other players so that th
 ```bash
 python3 main.py
 ```
-To populate `p{i}_cards.txt` with random card strings run
-```python3 generate_random_hands.py ```
+To populate `p{i}_cards.txt` with random card strings:
+```bash
+python3 generate_random_hands.py
+```
 
 ## Building ##
 Coming soon!

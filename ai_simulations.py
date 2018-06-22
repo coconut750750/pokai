@@ -32,7 +32,7 @@ def time_simulation(simulation):
 
 def setup_game(card_strs):
     hand = Hand(Card.strs_to_cards(card_strs))
-    print("Using hand:", hand)
+    print("Starting hand:", hand)
     aiplayer = AIPlayer(hand, 0, "")
     player = Player(hand, 0, "")
     game_state = GameState(17, 17)

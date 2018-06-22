@@ -80,7 +80,7 @@ def main():
 
         game_state.increment_turn()
     print("Player {} won!".format(game_state.get_winner()))
-    computer.reveal()
+    ai.reveal()
 
 if __name__ == '__main__':
     main()

@@ -33,10 +33,26 @@ class Card(object):
         """
         returns a list of cards with value of card_strs
         """
-        card_list = []
-        for card_str in card_strs:
-            card_list.append(Card.str_to_card(card_str))
-        return card_list
+        return [Card.str_to_card(card_str) for card_str in card_strs]
+
+    @staticmethod
+    def card_to_str(card):
+        """
+        returns the string representation of the card
+        """
+        name = card.name
+        suit = card.suit
+        if name == 'Z':
+            suit_str = '0' if card.value == SMALL_JOKER_VALUE else '1'
+        else:
+            suit_index = SUIT_DISPLAY.index(suit)
+            suit_str = SUITS[suit_index]
+        return name + suit_str
+
+    @staticmethod
+    def cards_to_strs(cards):
+        return [Card.card_to_str(card) for card in cards]
+
 
     def __init__(self, name, suit):
         super(Card, self).__init__()

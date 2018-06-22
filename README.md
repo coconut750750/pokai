@@ -16,16 +16,19 @@ The Monte Carlo simulations, uses three instances of ordinary Player objects wit
 #### AI Versus Player Performance: ####
 `ai_simulations.py` compares the performance between the AI and an ordinary player with a fixed strategy. To run the simulation:
 ```bash
-python3 -m pokai.ai_simulations
+python3 ai_simulations.py {x}
 ```
-The AI player performs approximately 50% better than the fixed-strategy player (i.e. winning 50% more games)
+where {x} is strength of the starting hand.
+
+Performance is scored based the number of wins. The AI player performs better than the fixed-strategy player by as low as 50% to as high as 400%. 
 
 #### Real Time: ####
-Before using, you must list the cards that are taken by other players so that the AI can determine the cards in its hand. List out the cards in a `.txt` file called `p{x}_cards.txt` for player x.
-
+Before using, you must list the cards that are taken by other players so that the AI can determine the cards in its hand. List out the cards in a `.txt` file called `p{i}_cards.txt` for player i.
 ```bash
-python3 -m pokai.main
+python3 main.py
 ```
+To populate `p{i}_cards.txt` with random card strings run
+```python3 generate_random_hands.py ```
 
 ## Building ##
 Coming soon!

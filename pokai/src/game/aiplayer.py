@@ -89,7 +89,7 @@ class AIPlayer(Player):
             hand_strength = self.get_hand_strength(game_state)
             best_play = get_best_specific_play(self, game_state)
             pass_play_strength = estimate_play_strength(None, self, game_state)
-            print("\n original: {0:.3f}\tbest play: {1:.3f}\tpass play: {2:.3f}".format(hand_strength, best_play.strength, pass_play_strength))
+            # print("\n original: {0:.3f}\tbest play: {1:.3f}\tpass play: {2:.3f}".format(hand_strength, best_play.strength, pass_play_strength))
             return best_play
         return wrapper
 

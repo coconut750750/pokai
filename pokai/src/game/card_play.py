@@ -58,6 +58,7 @@ class Play(object):
         self.position = position
         self.cards = cards
         self.num_extra = num_extra
+        self.strength = 0
         if not play_type:
             self.play_type = Play.get_play_from_cards(cards).play_type
         else:

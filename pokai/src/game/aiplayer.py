@@ -4,10 +4,12 @@ AIPlayer module with AIPlayer class
 
 from copy import deepcopy
 
-from pokai.src.ai_tools.monte_carlo import get_best_play
+from pokai.src.ai_tools.monte_carlo import get_best_play, estimate_play_strength,\
+                                           estimate_hand_strength
 
 from pokai.src.game.card_play import Play
-from pokai.src.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
+from pokai.src.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS,\
+                                TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
 from pokai.src.game.player import Player
 
 class AIPlayer(Player):
@@ -37,6 +39,9 @@ class AIPlayer(Player):
         self.bomb_threshold = 5
         self.play_threshold = 0.66 # will only play if the best play strength > 0.66
         """
+
+    def get_hand_strength(self, game_state):
+        return estimate_hand_strength(self, game_state)
 
     def _get_best_singular_basic(self, game_state, each_count):
         """
@@ -79,12 +84,24 @@ class AIPlayer(Player):
         possible_plays = self.hand.generate_possible_straights(base_card, each_count, base_length)
         return get_best_play(possible_plays, self, game_state)
 
+    def include_pass_play(get_best_specific_play):
+        def wrapper(self, game_state):
+            hand_strength = self.get_hand_strength(game_state)
+            best_play = get_best_specific_play(self, game_state)
+            pass_play_strength = estimate_play_strength(None, self, game_state)
+            print("\n original: {0:.3f}\tbest play: {1:.3f}\tpass play: {2:.3f}".format(hand_strength, best_play.strength, pass_play_strength))
+            return best_play
+        return wrapper
+
+    @include_pass_play
     def get_best_singles(self, game_state):
         return self._get_best_singular_basic(game_state, 1)
 
+    @include_pass_play
     def get_best_doubles(self, game_state):
         return self._get_best_singular_basic(game_state, 2)
 
+    @include_pass_play
     def get_best_triples(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 3)
         if not best_play:
@@ -92,12 +109,15 @@ class AIPlayer(Player):
         extra_each_count = game_state.prev_play.num_extra
         return self._get_best_play_with_extra(game_state, best_play, 1, extra_each_count)
 
+    @include_pass_play
     def get_best_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 1)
 
+    @include_pass_play
     def get_best_double_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 2)
 
+    @include_pass_play
     def get_best_adj_triples(self, game_state):
         best_play = self._get_best_singular_straight(game_state, 3)
         if not best_play:
@@ -105,6 +125,7 @@ class AIPlayer(Player):
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
+    @include_pass_play
     def get_best_quad(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 4)
         if not best_play:
@@ -112,6 +133,7 @@ class AIPlayer(Player):
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
+    @include_pass_play
     def get_best_wild(self, game_state):
         prev_play = game_state.prev_play
         base_card = None if not prev_play else prev_play.get_base_card()

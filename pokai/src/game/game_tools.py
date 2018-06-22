@@ -19,15 +19,6 @@ DOUBLE_STRAIGHTS = 'double_straights'
 ADJ_TRIPLES = 'adj_triples'
 DOUBLE_JOKER = 'double_joker'
 
-def game_is_over(players):
-    """
-    Returns if the game is over
-    """
-    ended = False
-    for p in players:
-        ended = ended or not p.hand.num_cards()
-    return ended
-
 def get_new_ordered_deck():
     """Returns an ordered list of all the cards"""
     deck = []

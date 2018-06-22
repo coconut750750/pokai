@@ -128,6 +128,7 @@ def estimate_hand_strength(player, game_state):
     player -- the player object
     game_state -- game information
     """
+    player = Player(player.hand, player.position, player.name)
     return simulate_multiprocesses(player, ESTIMATION_SIMULATIONS, game_state, 4) / ESTIMATION_SIMULATIONS
 
 def estimate_play_strength(card_play, player, game_state):
@@ -135,22 +136,19 @@ def estimate_play_strength(card_play, player, game_state):
     # TODO: use probabilities here
     player_sim = deepcopy(player)
     game_state_sim = deepcopy(game_state)
-    player_sim.play(card_play)
-    game_state_sim.cards_played(card_play)
+    if card_play:
+        player_sim.play(card_play)
+        game_state_sim.cards_played(card_play)
     game_state_sim.increment_turn()
     return estimate_hand_strength(player_sim, game_state_sim)
 
 def _get_single_best_play(card_plays, player, game_state):
     """Gets the best play optimized for returning only one play"""
-    if len(card_plays) == 1:
-        return card_plays[0]
     best_play = None
-    best_strength = -1
     for play in card_plays:
         play.position = player.position
-        strength = estimate_play_strength(play, player, game_state)
-        if strength > best_strength:
-            best_strength = strength
+        play.strength = estimate_play_strength(play, player, game_state)
+        if not best_play or play.strength > best_play.strength:
             best_play = play
     return best_play
 
@@ -164,7 +162,6 @@ def _get_multiple_best_plays(card_plays, player, game_state, num_best):
 def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
     card_plays = list(card_plays)
-    player = Player(player.hand, player.position, player.name)
     if num_best == 1:
         return _get_single_best_play(card_plays, player, game_state)
     else:

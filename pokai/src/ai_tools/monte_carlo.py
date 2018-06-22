@@ -30,7 +30,7 @@ def simulate_one_game(players, game_state, display):
         print("Player 2:", players[2].hand)
         print("simulation start")
 
-    while not game_is_over(players):
+    while game_state_sim.game_is_on():
         turn = game_state_sim.get_current_turn()
         next_play = players[turn].get_best_play(game_state_sim)
 
@@ -42,7 +42,7 @@ def simulate_one_game(players, game_state, display):
 
         game_state_sim.increment_turn()
 
-    return players[0].amount() == 0
+    return game_state_sim.get_winner() == 0
 
 def simulate_one_random_game(player, game_state, display):
     """
@@ -164,7 +164,7 @@ def _get_multiple_best_plays(card_plays, player, game_state, num_best):
 def get_best_play(card_plays, player, game_state, num_best=1):
     """Gets best play from list of plays"""
     card_plays = list(card_plays)
-    player = Player(player.hand, player.position, player.type)
+    player = Player(player.hand, player.position, player.name)
     if num_best == 1:
         return _get_single_best_play(card_plays, player, game_state)
     else:

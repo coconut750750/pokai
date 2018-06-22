@@ -35,6 +35,7 @@ class AIPlayer(Player):
             self._straight_diff = 1
         # the greater it is, the earlier player will bomb, use ace, use two
         self.bomb_threshold = 5
+        self.play_threshold = 0.66 # will only play if the best play strength > 0.66
         """
 
     def _get_best_singular_basic(self, game_state, each_count):

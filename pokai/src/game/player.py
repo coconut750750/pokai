@@ -7,11 +7,11 @@ from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STR
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 class Player(object):
     """docstring for Player"""
-    def __init__(self, hand, position, t):
+    def __init__(self, hand, position, name):
         super(Player, self).__init__()
         self.hand = hand
         self.position = position
-        self.type = t
+        self.name = name
 
     def get_cards(self):
         return self.hand.get_cards()
@@ -139,10 +139,7 @@ class Player(object):
     def play(self, card_play, display=False):
         self.hand.remove_cards(card_play.cards)
         if display:
-            print("{}".format(card_play.play_type))
-            for c in card_play.cards:
-                print(c, end=" ")
-            print()
+            print(card_play, end="\n\n")
 
     def amount(self):
         return self.hand.num_cards()

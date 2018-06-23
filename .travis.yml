@@ -3,4 +3,3 @@ python:
   - "3.6"
 script:
   - pytest -s
-  - python3 ai_simulations.py 3

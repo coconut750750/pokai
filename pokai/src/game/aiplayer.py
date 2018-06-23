@@ -37,8 +37,8 @@ class AIPlayer(Player):
             self._straight_diff = 1
         # the greater it is, the earlier player will bomb, use ace, use two
         self.bomb_threshold = 5
-        self.play_threshold = 0.66 # will only play if the best play strength > 0.66
         """
+        self.best_play_threshold = 0.95 # will only play if the best play strength is >= .95 * pass_play_strength
 
     def get_hand_strength(self, game_state):
         return estimate_hand_strength(self, game_state)
@@ -90,7 +90,7 @@ class AIPlayer(Player):
             if best_play:
                 pass_play_strength = estimate_play_strength(None, self, game_state)
                 print(best_play.strength, pass_play_strength)
-                if best_play.strength < pass_play_strength:
+                if best_play.strength < pass_play_strength * self.best_play_threshold:
                     return None
             return best_play
         return wrapper

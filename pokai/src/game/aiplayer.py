@@ -86,10 +86,11 @@ class AIPlayer(Player):
 
     def include_pass_play(get_best_specific_play):
         def wrapper(self, game_state):
-            hand_strength = self.get_hand_strength(game_state)
             best_play = get_best_specific_play(self, game_state)
-            pass_play_strength = estimate_play_strength(None, self, game_state)
-            # print("\n original: {0:.3f}\tbest play: {1:.3f}\tpass play: {2:.3f}".format(hand_strength, best_play.strength, pass_play_strength))
+            if best_play:
+                pass_play_strength = estimate_play_strength(None, self, game_state)
+                if best_play.strength < pass_play_strength:
+                    return None
             return best_play
         return wrapper
 

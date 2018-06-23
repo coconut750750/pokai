@@ -53,17 +53,21 @@ def main():
     n_cards1 = get_n_cards_1()
     game_state = GameState(hand.num_cards(), n_cards1)
     ai = AIPlayer(hand, 0, "Computer")
+    ai.reveal()
 
     while game_state.game_is_on():
         # Game Loop
         turn = game_state.get_current_turn()
 
         if not turn:
-            print("Computer's turn ({} cards left).".format(ai.amount()))
+            print("Computer's turn.")
             next_play = ai.get_best_play(game_state)
             if next_play:
                 game_state.cards_played(next_play)
                 ai.play(next_play, display=True)
+            else:
+                print("Computer passes.")
+            print("Computer has {} cards left.".format(ai.amount()))
         else:
             print("Player {}'s turn.".format(turn))
             user_input = input(PROMPT_PLAYED_CARDS)
@@ -79,6 +83,7 @@ def main():
                     print('Invalid Play.')
 
         game_state.increment_turn()
+        print()
     print("Player {} won!".format(game_state.get_winner()))
     ai.reveal()
 

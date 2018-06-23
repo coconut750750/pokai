@@ -93,7 +93,7 @@ class TestAIPlayer:
         _check_triple(best_play.cards)
 
     def test_ai_get_best_triples_single(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+        prev_play = Play(2, [Card('J', 'h'), Card('J', 'd'), Card('J', 'c'),
                              Card('4', 'c')], 1, play_type=TRIPLES)
         self.setup_game_state([prev_play])
         best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
@@ -102,13 +102,12 @@ class TestAIPlayer:
         _check_triple(best_play.cards)
 
     def test_ai_get_best_triples_double(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c'),
+        # should NOT play QQQ 10 10 since 10 10 is part of a bomb
+        prev_play = Play(2, [Card('J', 'h'), Card('J', 'd'), Card('J', 'c'),
                              Card('4', 'c'), Card('4', 'd')], 2, play_type=TRIPLES)
         self.setup_game_state([prev_play])
         best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
-        assert best_play.cards[0].name == 'Q'
-        assert best_play.cards[3].name == '0'
-        _check_triple(best_play.cards)
+        assert not best_play
 
     def test_ai_get_best_single_straight(self):
         prev_play = Play(2, [Card('3', 'h'), Card('4', 'd'), Card('5', 'c'),

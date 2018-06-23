@@ -73,10 +73,10 @@ class TestAIPlayer:
         _check_single(best_play.cards)
 
     def test_ai_get_best_doubles(self):
-        prev_play = Play(2, [Card('0', 's'), Card('0', 'd')], 0, play_type=DOUBLES)
+        prev_play = Play(2, [Card('8', 'c'), Card('8', 'd')], 0, play_type=DOUBLES)
         self.setup_game_state([prev_play])
         best_play = self.test_ai_player_lv2.get_best_doubles(self.game_state)
-        assert best_play.cards[0].name == 'J'
+        assert best_play.cards[0].name == '9'
         _check_double(best_play.cards)
 
     def test_ai_get_best_doubles_none(self):
@@ -86,7 +86,7 @@ class TestAIPlayer:
         _check_double(best_play.cards)
 
     def test_ai_get_best_triples_alone(self):
-        prev_play = Play(2, [Card('3', 'h'), Card('3', 'd'), Card('3', 'c')], 0, play_type=TRIPLES)
+        prev_play = Play(2, [Card('J', 'h'), Card('J', 'd'), Card('J', 'c')], 0, play_type=TRIPLES)
         self.setup_game_state([prev_play])
         best_play = self.test_ai_player_lv3.get_best_triples(self.game_state)
         assert best_play.cards[0].name == 'Q'

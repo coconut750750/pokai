@@ -1,12 +1,12 @@
 """
 Main command line interface for Pokai
 """
-from pokai.src.game.card import Card
-from pokai.src.game.hand import Hand
-from pokai.src.game.aiplayer import AIPlayer
-from pokai.src.game.game_tools import *
-from pokai.src.game.game_state import GameState
-from pokai.src.game.card_play import Play
+from pokai.game.card import Card
+from pokai.game.hand import Hand
+from pokai.game.aiplayer import AIPlayer
+from pokai.game.game_tools import *
+from pokai.game.game_state import GameState
+from pokai.game.card_play import Play
 
 PLAYER_1_FILE = 'p1_cards.txt'
 PLAYER_2_FILE = 'p2_cards.txt'

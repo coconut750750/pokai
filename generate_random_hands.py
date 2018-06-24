@@ -2,8 +2,8 @@
 Generates random hands and writes into p1_cards.txt and p2_cards.txt
 """
 
-from pokai.src.game.game_tools import get_new_shuffled_deck
-from pokai.src.game.card import Card
+from pokai.game.game_tools import get_new_shuffled_deck
+from pokai.game.card import Card
 
 def write_cards(cards, filename):
     cards = sorted(cards, key=lambda card: card.value)

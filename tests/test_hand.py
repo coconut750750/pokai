@@ -11,12 +11,12 @@ pytest test_card.py -vs
 import copy
 import random
 
-import pokai.src.game.card as card
-from pokai.src.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
-import pokai.src.game.hand as hand
-from pokai.src.game.game_tools import get_new_shuffled_deck, DOUBLE_JOKER
+import pokai.game.card as card
+from pokai.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+import pokai.game.hand as hand
+from pokai.game.game_tools import get_new_shuffled_deck, DOUBLE_JOKER
 
-from pokai.tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
+from tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
                                      _check_quadruples, _check_straight, _check_wild
 
 # if you want to run more random tests, increase

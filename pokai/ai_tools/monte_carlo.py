@@ -6,10 +6,10 @@ import multiprocessing
 from copy import deepcopy
 from random import randint
 
-import pokai.src.game.game_tools as game_tools
-from pokai.src.game.game_tools import *
-from pokai.src.game.hand import Hand
-from pokai.src.game.player import Player
+import pokai.game.game_tools as game_tools
+from pokai.game.game_tools import *
+from pokai.game.hand import Hand
+from pokai.game.player import Player
 
 ESTIMATION_SIMULATIONS = 1000
 

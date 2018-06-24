@@ -2,7 +2,7 @@
 Game State module
 """
 
-from pokai.src.game.game_tools import TOTAL_CARDS, NUM_PLAYERS,\
+from pokai.game.game_tools import TOTAL_CARDS, NUM_PLAYERS,\
                                  get_new_ordered_deck, remove_from_deck
 
 class GameState(object):

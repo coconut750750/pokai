@@ -2,7 +2,7 @@
 Module specifically designed to check if a play is valid
 """
 
-from pokai.src.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
+from pokai.game.card import SMALL_JOKER_VALUE, BIG_JOKER_VALUE
 
 def _check_single(single):
     """

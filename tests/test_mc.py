@@ -3,13 +3,14 @@ Testing module for Monte Carlo simulations
 """
 
 import time
-from pokai.src.ai_tools.monte_carlo import *
-from pokai.src.game.card import Card
-from pokai.src.game.hand import Hand
-from pokai.src.game.player import Player
-from pokai.src.game.game_state import GameState
-import pokai.src.game.game_tools as game_tools
-from pokai.src.game.card_play import Play
+
+from pokai.ai_tools.monte_carlo import *
+from pokai.game.card import Card
+from pokai.game.hand import Hand
+from pokai.game.player import Player
+from pokai.game.game_state import GameState
+import pokai.game.game_tools as game_tools
+from pokai.game.card_play import Play
 
 class TestMC(object):
     """

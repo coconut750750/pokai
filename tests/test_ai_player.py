@@ -4,15 +4,15 @@ Testing Module for AI Player
 
 from copy import deepcopy
 
-from pokai.src.game.card import Card
-from pokai.src.game.game_state import GameState
-from pokai.src.game.card_play import Play
-from pokai.src.game.hand import Hand
-from pokai.src.game.aiplayer import AIPlayer
-from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+from pokai.game.card import Card
+from pokai.game.game_state import GameState
+from pokai.game.card_play import Play
+from pokai.game.hand import Hand
+from pokai.game.aiplayer import AIPlayer
+from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 
-from pokai.tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
+from tests.play_checker import _check_single, _check_double, _check_triple, _check_adj_triple,\
                                      _check_quadruples, _check_straight, _check_wild
 
 class TestAIPlayer:

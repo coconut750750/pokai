@@ -4,7 +4,8 @@ Provides useful functionality for game operations
 """
 
 from random import shuffle
-from pokai.src.game.card import Card, VALUES, SUITS
+
+from pokai.game.card import Card, VALUES, SUITS
 
 NUM_PLAYERS = 3
 TOTAL_CARDS = 54

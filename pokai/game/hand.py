@@ -5,10 +5,10 @@ Contains the Hand class and other constants
 
 from itertools import groupby, combinations, chain
 
-from pokai.src.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
-from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+from pokai.game.card import Card, SMALL_JOKER_VALUE, BIG_JOKER_VALUE, MIN_VALUE, MAX_VALUE
+from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
-from pokai.src.game.card_play import Play
+from pokai.game.card_play import Play
 
 STRAIGHT_TERMINAL_VAL = 11
 SMALLEST_STRAIGHT = [5, 3, 2]

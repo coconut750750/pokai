@@ -5,7 +5,7 @@ Probability module for poker
 import operator as op
 from functools import reduce
 from itertools import groupby
-from pokai.src.game.game_tools import TOTAL_CARDS
+from pokai.game.game_tools import TOTAL_CARDS
 
 ##########  HELPER FUNCTIONS START  ##########
 

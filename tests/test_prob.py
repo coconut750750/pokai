@@ -5,9 +5,10 @@ Probability test module
 import time
 from itertools import combinations, groupby
 import random
-from pokai.src.ai_tools.probabilities import _prob_of_doubles, _prob_of_triples, _prob_of_quads, percent
-from pokai.src.game.card import Card
-from pokai.src.game.game_tools import get_new_shuffled_deck
+
+from pokai.ai_tools.probabilities import _prob_of_doubles, _prob_of_triples, _prob_of_quads, percent
+from pokai.game.card import Card
+from pokai.game.game_tools import get_new_shuffled_deck
 
 # if you want to run more random tests, increase
 TEST_MULTIPLIER = 1

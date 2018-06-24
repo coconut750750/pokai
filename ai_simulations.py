@@ -2,14 +2,14 @@
 Runs simulations with Player and AIPlayer and compares
 """
 import argparse
-
 from time import time
-from pokai.src.game.card import Card
-from pokai.src.game.game_state import GameState
-from pokai.src.game.hand import Hand
-from pokai.src.game.player import Player
-from pokai.src.game.aiplayer import AIPlayer
-from pokai.src.ai_tools.monte_carlo import simulate, simulate_multiprocesses
+
+from pokai.game.card import Card
+from pokai.game.game_state import GameState
+from pokai.game.hand import Hand
+from pokai.game.player import Player
+from pokai.game.aiplayer import AIPlayer
+from pokai.ai_tools.monte_carlo import simulate, simulate_multiprocesses
 
 parser = argparse.ArgumentParser(description='Simulate AI and Player.')
 parser.add_argument("hand_strength", type=int, choices=[1, 2, 3], 
@@ -41,8 +41,8 @@ def setup_game(card_strs):
 @time_simulation
 def simulate_ai_with_cards(card_strs):
     aiplayer, player, game_state = setup_game(card_strs)
-    player_wins = simulate_multiprocesses(player, 100, game_state, 4)
-    ai_wins = simulate(aiplayer, 100, game_state, display_progress_only=True)
+    player_wins = simulate_multiprocesses(player, 250, game_state, 4)
+    ai_wins = simulate(aiplayer, 250, game_state, display_progress_only=True)
     return ai_wins, player_wins
 
 def main(hand):

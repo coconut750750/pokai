@@ -5,6 +5,7 @@ Player module with Player class
 from pokai.src.game.hand import Hand
 from pokai.src.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+
 class Player(object):
     """docstring for Player"""
     def __init__(self, hand, position, name):
@@ -22,7 +23,7 @@ class Player(object):
     def info(self):
         self.hand.print_categories()
 
-    def _get_possible_leads(self, game_state):
+    def get_possible_leads(self, game_state):
         possible_leads = []
         possible_leads.append(self._get_lead_adj_triples(game_state))
         possible_leads.append(self._get_lead_straight(2, game_state))
@@ -33,14 +34,14 @@ class Player(object):
         possible_leads.append(self._get_lead_quadruple(game_state))
         possible_leads.append(self._get_lead_wild(game_state))
         possible_leads = list(filter(lambda play: play != None, possible_leads))
-        return possible_leads + [None]
+        return possible_leads
 
     def get_best_lead_play(self, game_state):
         """
         Gets the best play if this player is starting.
         Returns lead play
         """
-        return self._get_possible_leads(game_state)[0]
+        return self.get_possible_leads(game_state)[0]
 
     def _get_lead_basic(self, each_count, game_state):
         return self.hand.get_low(None, each_count)

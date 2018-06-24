@@ -151,7 +151,7 @@ class Hand(object):
         Returns the lowest play with pos -1 or None
         """
         iterator = self.generate_possible_basics(other_card, each_count, extra=extra)
-        return next(iterator, None)
+        return next(iterator, Play.get_pass_play())
 
     def generate_possible_straights(self, other_card, each_count, length):
         """
@@ -180,7 +180,7 @@ class Hand(object):
         Returns play with pos of -1 or None
         """
         iterator = self.generate_possible_straights(other_card, each_count, length)
-        return next(iterator, None)
+        return next(iterator, Play.get_pass_play())
 
     def generate_possible_adj_triples(self, other_card, num_extra):
         """
@@ -205,7 +205,7 @@ class Hand(object):
         Returns play with pos of -1 or None
         """
         iterator = self.generate_possible_adj_triples(other_card, num_extra)
-        return next(iterator, None)
+        return next(iterator, Play.get_pass_play())
 
     def generate_possible_wilds(self, other_card):
         """
@@ -221,7 +221,7 @@ class Hand(object):
         Pos of the play is -1
         """
         iterator = self.generate_possible_wilds(other_card)
-        return next(iterator, None)
+        return next(iterator, Play.get_pass_play())
 
     def get_num_wild(self):
         """

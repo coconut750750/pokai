@@ -5,6 +5,7 @@ Player module with Player class
 from pokai.game.hand import Hand
 from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                       DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+from pokai.game.card_play import Play
 
 class Player(object):
     """docstring for Player"""
@@ -33,7 +34,7 @@ class Player(object):
         possible_leads.append(self._get_lead_basic(1, game_state))
         possible_leads.append(self._get_lead_quadruple(game_state))
         possible_leads.append(self._get_lead_wild(game_state))
-        possible_leads = list(filter(lambda play: play != None, possible_leads))
+        possible_leads = list(filter(lambda play: play, possible_leads))
         return possible_leads
 
     def get_best_lead_play(self, game_state):
@@ -83,25 +84,30 @@ class Player(object):
             # lead play
             next_play = self.get_best_lead_play(game_state)
         else:
-            if prev_play.play_type == SINGLES:
+            prev_type = prev_play.play_type
+            if prev_type == DOUBLE_JOKER:
+                return Play.get_pass_play(position=self.position)
+            elif prev_type == SINGLES:
                 next_play = self.get_best_singles(game_state)
-            elif prev_play.play_type == DOUBLES:
+            elif prev_type == DOUBLES:
                 next_play = self.get_best_doubles(game_state)
-            elif prev_play.play_type == TRIPLES:
+            elif prev_type == TRIPLES:
                 next_play = self.get_best_triples(game_state)
-            elif prev_play.play_type == STRAIGHTS:
+            elif prev_type == STRAIGHTS:
                 next_play = self.get_best_straights(game_state)
-            elif prev_play.play_type == DOUBLE_STRAIGHTS:
+            elif prev_type == DOUBLE_STRAIGHTS:
                 next_play = self.get_best_double_straights(game_state)
-            elif prev_play.play_type == ADJ_TRIPLES:
+            elif prev_type == ADJ_TRIPLES:
                 next_play = self.get_best_adj_triples(game_state)
-            elif prev_play.play_type == QUADRUPLES:
+            elif prev_type == QUADRUPLES:
                 next_play = self.get_best_quad(game_state)
             else:
                 next_play = self.get_best_wild(game_state)
             # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
             # play wilds
-            if not next_play and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
+            # and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
+
+            if not next_play and not prev_play.is_wild():
                 next_play = self.hand.get_low_wild(None)
 
         if next_play:

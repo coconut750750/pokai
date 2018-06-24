@@ -8,8 +8,9 @@ from pokai.ai_tools.monte_carlo import get_best_play, estimate_play_strength,\
                                            estimate_hand_strength
 
 from pokai.game.card_play import Play
-from pokai.game.hand import Hand, ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS,\
-                                TRIPLES, DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER
+from pokai.game.hand import Hand
+from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
+                                      DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 from pokai.game.player import Player
 
 class AIPlayer(Player):
@@ -21,24 +22,8 @@ class AIPlayer(Player):
         # order of lead plays
         self.order = [ADJ_TRIPLES, DOUBLE_STRAIGHTS, STRAIGHTS, TRIPLES, 
                       DOUBLES, SINGLES, QUADRUPLES, DOUBLE_JOKER]
-        # order of playing extra triple cards
-        self.triple_order = [2, 1, 0]
-        # order of playing extra adj_triple cards
-        self.adj_triple_order = [2, 4, 0]
-        # play long (True) straights or short straights first?
-        self.long_straight_priority = True
-        if self.long_straight_priority:
-            self._straight_start = 12
-            self._straight_end = 5
-            self._straight_diff = -1
-        else:
-            self._straight_start = 5
-            self._straight_end = 12
-            self._straight_diff = 1
-        # the greater it is, the earlier player will bomb, use ace, use two
-        self.bomb_threshold = 5
         """
-        self.best_play_threshold = 0.95 # will only play if the best play strength is >= .95 * pass_play_strength
+        self.pass_play_significance = 0.05 # will only pass pass play strength is >= best play strength + 0.05
 
     def get_hand_strength(self, game_state):
         return estimate_hand_strength(self, game_state)
@@ -72,6 +57,22 @@ class AIPlayer(Player):
                           for extra in possible_extras]
         return get_best_play(possible_plays, self, game_state)
 
+    def _get_best_quad_with_extra(self, game_state):
+        """
+        From all possible quads with extras, get the best one.
+        Cannot simply choose best base then get best extras due to the flexibility
+        of playing quads.
+        """
+        prev_play = game_state.prev_play
+        extra_each_count = game_state.prev_play.num_extra // 2
+        base_card = None if not prev_play else prev_play.get_base_card()
+        possible_quads = self.hand.generate_possible_basics(base_card, 4)
+        best_quads_with_extras = []
+        for quad in possible_quads:
+            best_quad = self._get_best_play_with_extra(game_state, quad, 2, extra_each_count)
+            best_quads_with_extras.append(best_quad)
+        return get_best_play(best_quads_with_extras, self, game_state)
+
     def _get_best_singular_straight(self, game_state, each_count):
         """
         Gets the best straight without any extras
@@ -84,13 +85,25 @@ class AIPlayer(Player):
         possible_plays = self.hand.generate_possible_straights(base_card, each_count, base_length)
         return get_best_play(possible_plays, self, game_state)
 
+    def include_wild_play(get_best_specific_play):
+        def wrapper(self, game_state):
+            play = get_best_specific_play(self, game_state)
+            wild_play = self.get_best_wild(game_state)
+            if wild_play.strength > play.strength:
+                return wild_play
+            return play
+        return wrapper
+
     def include_pass_play(get_best_specific_play):
         def wrapper(self, game_state):
             best_play = get_best_specific_play(self, game_state)
             if best_play:
                 pass_play_strength = estimate_play_strength(None, self, game_state)
-                if best_play.strength < pass_play_strength * self.best_play_threshold:
-                    return None
+
+                if best_play.strength < pass_play_strength - self.pass_play_significance:
+                    pass_play = Play.get_pass_play(position=self.position)
+                    pass_play.strength = pass_play_strength
+                    return pass_play
             return best_play
         return wrapper
 
@@ -102,49 +115,59 @@ class AIPlayer(Player):
         possible_leads = self.get_possible_leads(game_state)
         return get_best_play(possible_leads, self, game_state)
 
+    @include_wild_play
     @include_pass_play
     def get_best_singles(self, game_state):
         return self._get_best_singular_basic(game_state, 1)
 
+    @include_wild_play
     @include_pass_play
     def get_best_doubles(self, game_state):
         return self._get_best_singular_basic(game_state, 2)
 
+    @include_wild_play
     @include_pass_play
     def get_best_triples(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 3)
         if not best_play:
-            return None
+            return Play.get_pass_play()
         extra_each_count = game_state.prev_play.num_extra
         return self._get_best_play_with_extra(game_state, best_play, 1, extra_each_count)
 
+    @include_wild_play
     @include_pass_play
     def get_best_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 1)
 
+    @include_wild_play
     @include_pass_play
     def get_best_double_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 2)
 
+    @include_wild_play
     @include_pass_play
     def get_best_adj_triples(self, game_state):
         best_play = self._get_best_singular_straight(game_state, 3)
         if not best_play:
-            return None
+            return Play.get_pass_play()
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
+    @include_wild_play
     @include_pass_play
     def get_best_quad(self, game_state):
-        best_play = self._get_best_singular_basic(game_state, 4)
-        if not best_play:
-            return None
-        extra_each_count = game_state.prev_play.num_extra // 2
-        return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
-
+        prev_play = game_state.prev_play
+        if not prev_play.num_extra:
+            return self._get_best_singular_basic(game_state, 4)
+        else:
+            return self._get_best_quad_with_extra(game_state)
+       
     @include_pass_play
     def get_best_wild(self, game_state):
         prev_play = game_state.prev_play
-        base_card = None if not prev_play else prev_play.get_base_card()
+        if not prev_play:
+            base_card = None
+        else:
+            base_card = prev_play.get_base_card() if prev_play.is_wild() else None
         possible_plays = self.hand.generate_possible_wilds(base_card)
         return get_best_play(possible_plays, self, game_state)

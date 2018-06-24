@@ -115,18 +115,12 @@ class AIPlayer(Player):
         possible_leads = self.get_possible_leads(game_state)
         return get_best_play(possible_leads, self, game_state)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_singles(self, game_state):
         return self._get_best_singular_basic(game_state, 1)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_doubles(self, game_state):
         return self._get_best_singular_basic(game_state, 2)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_triples(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 3)
         if not best_play:
@@ -134,18 +128,12 @@ class AIPlayer(Player):
         extra_each_count = game_state.prev_play.num_extra
         return self._get_best_play_with_extra(game_state, best_play, 1, extra_each_count)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 1)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_double_straights(self, game_state):
         return self._get_best_singular_straight(game_state, 2)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_adj_triples(self, game_state):
         best_play = self._get_best_singular_straight(game_state, 3)
         if not best_play:
@@ -153,8 +141,6 @@ class AIPlayer(Player):
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
-    @include_wild_play
-    @include_pass_play
     def get_best_quad(self, game_state):
         prev_play = game_state.prev_play
         if not prev_play.num_extra:
@@ -162,7 +148,6 @@ class AIPlayer(Player):
         else:
             return self._get_best_quad_with_extra(game_state)
        
-    @include_pass_play
     def get_best_wild(self, game_state):
         prev_play = game_state.prev_play
         if not prev_play:

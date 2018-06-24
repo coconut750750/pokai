@@ -107,8 +107,9 @@ class Player(object):
             # play wilds
             # and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
 
-            if not next_play and not prev_play.is_wild():
-                next_play = self.hand.get_low_wild(None)
+            if type(self) == Player:
+                if not next_play and not prev_play.is_wild():
+                    next_play = self.hand.get_low_wild(None)
 
         if next_play:
             next_play.position = self.position

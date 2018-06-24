@@ -170,7 +170,6 @@ class TestAIPlayer:
                               Card('5', 'h'), Card('5', 's')], 4, play_type=QUADRUPLES)
         self.setup_game_state([prev_play1, prev_play2, prev_play3])
         best_play = player.get_best_quad(self.game_state)
-        print("best:", best_play)
         assert best_play.cards[0].name == '7'
         _check_quadruples(best_play.cards)
 

@@ -89,11 +89,18 @@ class AIPlayer(Player):
             best_play = get_best_specific_play(self, game_state)
             if best_play:
                 pass_play_strength = estimate_play_strength(None, self, game_state)
-                print(best_play.strength, pass_play_strength)
                 if best_play.strength < pass_play_strength * self.best_play_threshold:
                     return None
             return best_play
         return wrapper
+
+    def get_best_lead_play(self, game_state):
+        """
+        Gets the best play if this player is starting.
+        Returns lead play
+        """
+        possible_leads = self.get_possible_leads(game_state)
+        return get_best_play(possible_leads, self, game_state)
 
     @include_pass_play
     def get_best_singles(self, game_state):

@@ -81,6 +81,7 @@ def main():
                     print(next_play)
                 else:
                     print('Invalid Play.')
+            print('Player {} has {} cards left.'.format(turn, game_state.get_player_num_cards(turn)))
 
         game_state.increment_turn()
         print()

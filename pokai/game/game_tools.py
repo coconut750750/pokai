@@ -19,6 +19,7 @@ STRAIGHTS = 'straights'
 DOUBLE_STRAIGHTS = 'double_straights'
 ADJ_TRIPLES = 'adj_triples'
 DOUBLE_JOKER = 'double_joker'
+PASS = 'pass'
 
 def get_new_ordered_deck():
     """Returns an ordered list of all the cards"""

@@ -12,7 +12,7 @@ from pokai.game.hand import Hand
 from pokai.game.player import Player
 from pokai.game.card_play import Play
 
-ESTIMATION_SIMULATIONS = 100
+ESTIMATION_SIMULATIONS = 1000
 
 def simulate_one_game(players, game_state, display):
     """

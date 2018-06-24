@@ -101,42 +101,51 @@ class Player(object):
                 next_play = self.get_best_adj_triples(game_state)
             elif prev_type == QUADRUPLES:
                 next_play = self.get_best_quad(game_state)
-            else:
-                next_play = self.get_best_wild(game_state)
             # if next play is none and the player has less than 5 * (number of wilds in hand) cards,
             # play wilds
             # and game_state.get_player_num_cards(prev_play.position) <= 5 * self.hand.get_num_wild():
-
-            if type(self) == Player:
-                if not next_play and not prev_play.is_wild():
-                    next_play = self.hand.get_low_wild(None)
 
         if next_play:
             next_play.position = self.position
         return next_play
 
+    def include_wild_play(get_best_specific_play):
+        def wrapper(self, game_state):
+            next_play = get_best_specific_play(self, game_state)
+            if not next_play and not game_state.prev_play.is_wild():
+                return self.hand.get_low_wild(None)
+            return next_play
+        return wrapper
+
+    @include_wild_play
     def get_best_singles(self, game_state):
         return self.hand.get_low(game_state.get_prev_base_card(), 1)
 
+    @include_wild_play
     def get_best_doubles(self, game_state):
         return self.hand.get_low(game_state.get_prev_base_card(), 2)
 
+    @include_wild_play
     def get_best_triples(self, game_state):
         prev_play = game_state.prev_play
         return self.hand.get_low(prev_play.get_base_card(), 3, prev_play.num_extra)
 
+    @include_wild_play
     def get_best_straights(self, game_state):
         prev_play = game_state.prev_play
         return self.hand.get_low_straight(prev_play.get_base_card(), 1, prev_play.num_base_cards())
 
+    @include_wild_play
     def get_best_double_straights(self, game_state):
         prev_play = game_state.prev_play
         return self.hand.get_low_straight(prev_play.get_base_card(), 2, prev_play.num_base_cards() // 2)
 
+    @include_wild_play
     def get_best_adj_triples(self, game_state):
         prev_play = game_state.prev_play
         return self.hand.get_low_adj_triple(prev_play.get_base_card(), prev_play.num_extra)
 
+    @include_wild_play
     def get_best_quad(self, game_state):
         prev_play = game_state.prev_play
         return self.hand.get_low(prev_play.get_base_card(), 4, prev_play.num_extra)

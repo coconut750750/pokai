@@ -13,8 +13,8 @@ def write_cards(cards, filename):
 
 def main():
     deck = get_new_shuffled_deck()
-    p1_cards = deck[0: 17]
-    p2_cards = deck[17: 37]
+    p1_cards = deck[0: 20]
+    p2_cards = deck[20: 37]
     write_cards(p1_cards, 'p1_cards.txt')
     write_cards(p2_cards, 'p2_cards.txt')
 

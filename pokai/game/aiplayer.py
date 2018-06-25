@@ -87,7 +87,6 @@ class AIPlayer(Player):
 
     def include_wild_play(get_best_specific_play):
         def wrapper(self, game_state):
-            print("chekcing wilds")
             play = get_best_specific_play(self, game_state)
             wild_play = self.get_best_wild(game_state)
             if wild_play.strength > play.strength:
@@ -97,7 +96,6 @@ class AIPlayer(Player):
 
     def include_pass_play(get_best_specific_play):
         def wrapper(self, game_state):
-            print("checking pass")
             best_play = get_best_specific_play(self, game_state)
             if best_play:
                 pass_play_strength = estimate_play_strength(None, self, game_state)

@@ -95,7 +95,7 @@ class Play(object):
     def __str__(self):
         """Return string representation"""
         sep = " | "
-        s = "Player {} ({} with {} extra cards and strength: {}) ".format(self.position, self.play_type, self.num_extra, self.strength) + sep
+        s = "Player {} ({} with {} extra cards) ".format(self.position, self.play_type, self.num_extra) + sep
         for card in self.cards:
             s += card.display + sep
         return s.strip()

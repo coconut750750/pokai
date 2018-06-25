@@ -33,6 +33,14 @@ class GameState(object):
             self.player_cards[card_play.position] -= len(card_play.cards)
             self.used_cards += card_play.cards
 
+    def play_was_used(self, card_play):
+        if not card_play:
+            return False
+        for card in card_play.cards:
+            if card in self.used_cards:
+                return True
+        return False
+
     def increment_turn(self):
         """
         Called when the game progresses by a turn

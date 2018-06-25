@@ -1,12 +1,16 @@
 """
 Main command line interface for Pokai
 """
+import os
+
 from pokai.game.card import Card
 from pokai.game.hand import Hand
 from pokai.game.aiplayer import AIPlayer
 from pokai.game.game_tools import *
 from pokai.game.game_state import GameState
 from pokai.game.card_play import Play
+
+window_rows, window_columns = os.popen('stty size', 'r').read().split()
 
 PLAYER_1_FILE = 'p1_cards.txt'
 PLAYER_2_FILE = 'p2_cards.txt'
@@ -42,6 +46,8 @@ def game_playing(ai_hand, n_cards1, n_cards2):
 
 def get_play_from_input(user_input):
     """returns card play based on user's input"""
+    if not user_input:
+        return None
     player_card_strs = user_input.split()
     played_cards = Card.strs_to_cards(player_card_strs)
     next_play = Play.get_play_from_cards(played_cards)
@@ -54,9 +60,11 @@ def main():
     game_state = GameState(hand.num_cards(), n_cards1)
     ai = AIPlayer(hand, 0, "Computer")
     ai.reveal()
+    print(ai.get_hand_strength(game_state))
 
     while game_state.game_is_on():
         # Game Loop
+        print("-" * int(window_columns))
         turn = game_state.get_current_turn()
 
         if not turn:
@@ -70,21 +78,19 @@ def main():
             print("Computer has {} cards left.".format(ai.amount()))
         else:
             print("Player {}'s turn.".format(turn))
-            user_input = input(PROMPT_PLAYED_CARDS)
-            if not user_input:
+            next_play = get_play_from_input(input(PROMPT_PLAYED_CARDS))
+            while game_state.play_was_used(next_play):
+                next_play = get_play_from_input(input(PROMPT_PLAYED_CARDS))
+
+            if not next_play:
                 print('Player {} passes'.format(turn))
             else:
-                next_play = get_play_from_input(user_input)
-                if next_play:
-                    next_play.position = turn
-                    game_state.cards_played(next_play)
-                    print(next_play)
-                else:
-                    print('Invalid Play.')
+                next_play.position = turn
+                game_state.cards_played(next_play)
+                print(next_play)
             print('Player {} has {} cards left.'.format(turn, game_state.get_player_num_cards(turn)))
 
         game_state.increment_turn()
-        print()
     print("Player {} won!".format(game_state.get_winner()))
     ai.reveal()
 

@@ -10,6 +10,7 @@ import pokai.game.game_tools as game_tools
 from pokai.game.game_tools import *
 from pokai.game.hand import Hand
 from pokai.game.player import Player
+from pokai.game.card_play import Play
 
 ESTIMATION_SIMULATIONS = 1000
 
@@ -24,6 +25,7 @@ def simulate_one_game(players, game_state, display):
     Returns if hand wins the game
     """
     game_state_sim = deepcopy(game_state)
+    # display=True
     if display:
         print("Player 0:", players[0].hand)
         print("Player 1:", players[1].hand)
@@ -144,7 +146,7 @@ def estimate_play_strength(card_play, player, game_state):
 
 def _get_single_best_play(card_plays, player, game_state):
     """Gets the best play optimized for returning only one play"""
-    best_play = None
+    best_play = Play.get_pass_play()
     for play in card_plays:
         play.position = player.position
         play.strength = estimate_play_strength(play, player, game_state)

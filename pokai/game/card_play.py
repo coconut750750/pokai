@@ -7,11 +7,15 @@ play in the game.
 from itertools import groupby
 
 from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
-                                 DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
+                                 DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER, PASS
 from pokai.game.card import SMALL_JOKER_VALUE
 
 class Play(object):
     """Play class"""
+
+    @staticmethod
+    def get_pass_play(position=-1):
+        return Play(position, [], 0, play_type=PASS)
 
     @staticmethod
     def get_play_from_cards(cards_played):
@@ -74,7 +78,13 @@ class Play(object):
 
     def get_base_card(self):
         """Returns the base card of this play (the card another player needs to beat)"""
-        return self.cards[0]
+        return self[0]
+
+    def is_wild(self):
+        return self.play_type == DOUBLE_JOKER or (self.play_type == QUADRUPLES and not self.num_extra)
+
+    def __getitem__(self, key):
+        return self.cards[key]
 
     def __hash__(self):
         return hash(str(self))
@@ -96,3 +106,6 @@ class Play(object):
         for card in self.cards:
             s += card.display + sep
         return "[{}]".format(s.strip())
+
+    def __bool__(self):
+        return self != None and self.play_type != PASS

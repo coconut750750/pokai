@@ -14,7 +14,11 @@ from pokai.ai_tools.monte_carlo import simulate, simulate_multiprocesses
 parser = argparse.ArgumentParser(description='Simulate AI and Player.')
 parser.add_argument("hand_strength", type=int, choices=[1, 2, 3], 
                     help='choose the strength of the starting hand.')
-hand_strength = parser.parse_args().hand_strength
+parser.add_argument("num_simulations", type=int,
+                    help='choose the number of simulations.')
+parsed_args = parser.parse_args()
+hand_strength = parsed_args.hand_strength
+num_simulations = parsed_args.num_simulations
 
 def time_simulation(simulation):
     def wrapper(*args, **kwargs):
@@ -39,13 +43,14 @@ def setup_game(card_strs):
     return aiplayer, player, game_state
 
 @time_simulation
-def simulate_ai_with_cards(card_strs):
+def simulate_ai_with_cards(card_strs, num_simulations):
     aiplayer, player, game_state = setup_game(card_strs)
-    player_wins = simulate_multiprocesses(player, 250, game_state, 4)
-    ai_wins = simulate(aiplayer, 250, game_state, display_progress_only=True)
+    player_wins = simulate_multiprocesses(player, num_simulations, game_state, 4)
+    ai_wins = simulate(aiplayer, num_simulations, game_state, display_progress_only=True)
+    print(player_wins, ai_wins)
     return ai_wins, player_wins
 
-def main(hand):
+def main(hand, num_simulations):
     strength1 = ['7h', '6h', '0d', '3s', '6s', 'Js', '7d', '9c', 'Ac',
                  'Kd', '5h', '2H', '5C', '0C', '0H', '4D', 'KH']
     strength2 = ['3h', '4s', '4h', '5d', '6s', '7c', '9h', '9d', '0c',
@@ -53,7 +58,7 @@ def main(hand):
     strength3 = ['4h', '5d', '6c', '7s', '8s', '0s', '0c', '0d', '0h',
                  'QH', 'QD', 'QS', 'KH', 'KS', 'KD', 'KC', 'AC']
     hands = [strength1, strength2, strength3]
-    simulate_ai_with_cards(hands[hand - 1])
+    simulate_ai_with_cards(hands[hand - 1], num_simulations)
 
 if __name__ == '__main__':
-    main(hand_strength)
+    main(hand_strength, num_simulations)

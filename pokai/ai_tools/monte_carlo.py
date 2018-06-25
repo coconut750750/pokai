@@ -146,7 +146,7 @@ def estimate_play_strength(card_play, player, game_state):
 
 def _get_single_best_play(card_plays, player, game_state):
     """Gets the best play optimized for returning only one play"""
-    best_play = Play.get_pass_play()
+    best_play = Play.get_pass_play(position=player.position)
     for play in card_plays:
         play.position = player.position
         play.strength = estimate_play_strength(play, player, game_state)

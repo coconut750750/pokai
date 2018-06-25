@@ -156,7 +156,7 @@ class Player(object):
     def play(self, card_play, display=False):
         self.hand.remove_cards(card_play.cards)
         if display:
-            print(card_play, end="\n")
+            print(card_play)
 
     def amount(self):
         return self.hand.num_cards()

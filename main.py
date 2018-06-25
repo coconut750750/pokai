@@ -2,6 +2,7 @@
 Main command line interface for Pokai
 """
 import os
+import argparse
 
 from pokai.game.card import Card
 from pokai.game.hand import Hand
@@ -11,6 +12,10 @@ from pokai.game.game_state import GameState
 from pokai.game.card_play import Play
 
 window_rows, window_columns = os.popen('stty size', 'r').read().split()
+parser = argparse.ArgumentParser(description='Play a game with the AI.')
+parser.add_argument('-d', '--debug', dest='debug', action='store_true',
+                    help="use this flag to debug AI")
+debug = parser.parse_args().debug
 
 PLAYER_1_FILE = 'p1_cards.txt'
 PLAYER_2_FILE = 'p2_cards.txt'
@@ -53,14 +58,19 @@ def get_play_from_input(user_input):
     next_play = Play.get_play_from_cards(played_cards)
     return next_play
 
-def main():
-    """Main method"""
+def init_game():
     hand = get_computer_hand()
     n_cards1 = get_n_cards_1()
     game_state = GameState(hand.num_cards(), n_cards1)
     ai = AIPlayer(hand, 0, "Computer")
-    ai.reveal()
-    print(ai.get_hand_strength(game_state))
+    if debug:
+        print("AI's hand:")
+        ai.reveal()
+        print("AI's hand strength:", ai.get_hand_strength(game_state))
+    return game_state, ai
+
+def main():
+    game_state, ai = init_game()
 
     while game_state.game_is_on():
         # Game Loop
@@ -69,12 +79,8 @@ def main():
 
         if not turn:
             print("Computer's turn.")
-            next_play = ai.get_best_play(game_state)
-            if next_play:
-                game_state.cards_played(next_play)
-                ai.play(next_play, display=True)
-            else:
-                print("Computer passes.")
+            next_play = ai.get_best_play(game_state)                
+            ai.play(next_play)
             print("Computer has {} cards left.".format(ai.amount()))
         else:
             print("Player {}'s turn.".format(turn))
@@ -82,15 +88,13 @@ def main():
             while game_state.play_was_used(next_play):
                 next_play = get_play_from_input(input(PROMPT_PLAYED_CARDS))
 
-            if not next_play:
-                print('Player {} passes'.format(turn))
-            else:
-                next_play.position = turn
-                game_state.cards_played(next_play)
-                print(next_play)
+            next_play.position = turn
             print('Player {} has {} cards left.'.format(turn, game_state.get_player_num_cards(turn)))
 
+        print(next_play)
+        game_state.cards_played(next_play)
         game_state.increment_turn()
+
     print("Player {} won!".format(game_state.get_winner()))
     ai.reveal()
 

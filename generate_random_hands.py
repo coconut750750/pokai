@@ -1,5 +1,8 @@
 """
-Generates random hands and writes into p1_cards.txt and p2_cards.txt
+Generates random hands and writes them into p1_cards.txt and p2_cards.txt
+These files can then be used for main.py
+
+Example usage: python3 generate_random_hands.py
 """
 
 from pokai.game.game_tools import get_new_shuffled_deck

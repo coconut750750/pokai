@@ -104,6 +104,7 @@ class AIPlayer(Player):
                     pass_play = Play.get_pass_play(position=self.position)
                     pass_play.strength = pass_play_strength
                     return pass_play
+            
             return best_play
         return wrapper
 
@@ -130,7 +131,7 @@ class AIPlayer(Player):
     def get_best_triples(self, game_state):
         best_play = self._get_best_singular_basic(game_state, 3)
         if not best_play:
-            return Play.get_pass_play()
+            return Play.get_pass_play(position=self.position)
         extra_each_count = game_state.prev_play.num_extra
         return self._get_best_play_with_extra(game_state, best_play, 1, extra_each_count)
 
@@ -149,7 +150,7 @@ class AIPlayer(Player):
     def get_best_adj_triples(self, game_state):
         best_play = self._get_best_singular_straight(game_state, 3)
         if not best_play:
-            return Play.get_pass_play()
+            return Play.get_pass_play(position=self.position)
         extra_each_count = game_state.prev_play.num_extra // 2
         return self._get_best_play_with_extra(game_state, best_play, 2, extra_each_count)
 
@@ -162,7 +163,6 @@ class AIPlayer(Player):
         else:
             return self._get_best_quad_with_extra(game_state)
        
-    @include_pass_play
     def get_best_wild(self, game_state):
         prev_play = game_state.prev_play
         if not prev_play:

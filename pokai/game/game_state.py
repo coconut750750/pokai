@@ -25,13 +25,21 @@ class GameState(object):
         Called when a player plays cards
         cards_played -- Play of cards that were played
         """
-        self.discard_cards(card_play)
-        self.prev_play = card_play
+        if card_play:
+            self.discard_cards(card_play) 
+            self.prev_play = card_play
 
     def discard_cards(self, card_play):
-        if card_play:
-            self.player_cards[card_play.position] -= len(card_play.cards)
-            self.used_cards += card_play.cards
+        self.player_cards[card_play.position] -= len(card_play.cards)
+        self.used_cards += card_play.cards
+
+    def play_was_used(self, card_play):
+        if not card_play:
+            return False
+        for card in card_play.cards:
+            if card in self.used_cards:
+                return True
+        return False
 
     def increment_turn(self):
         """

@@ -1,6 +1,9 @@
 """
-Runs simulations with Player and AIPlayer and compares
+Runs simulations with Player and AIPlayer and compares their performances
+
+Example usage: python3 ai_simuations 2 50
 """
+
 import argparse
 from time import time
 

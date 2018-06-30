@@ -4,8 +4,8 @@ AIPlayer module with AIPlayer class
 
 from copy import deepcopy
 
-from pokai.ai_tools.monte_carlo import get_best_play, estimate_play_strength,\
-                                           estimate_hand_strength
+from pokai.ai.monte_carlo import get_best_play, estimate_play_strength,\
+                                 estimate_hand_strength
 
 from pokai.game.card_play import Play
 from pokai.game.hand import Hand

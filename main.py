@@ -11,7 +11,7 @@ import argparse
 
 from pokai.game.card import Card
 from pokai.game.hand import Hand
-from pokai.game.aiplayer import AIPlayer
+from pokai.ai.aiplayer import AIPlayer
 from pokai.game.game_tools import get_new_ordered_deck, remove_from_deck
 from pokai.game.game_state import GameState
 from pokai.game.card_play import Play
@@ -41,7 +41,7 @@ def get_cards_from_file(filename):
             card_strs.append(card_str)
     return Card.strs_to_cards(card_strs)
 
-def get_n_cards_1():
+def get_num_cards_1():
     """returns number of cards in player 1's hand"""
     cards = get_cards_from_file(player_1_file)
     return len(cards)
@@ -57,7 +57,7 @@ def get_ai_hand():
 
 def init_game():
     hand = get_ai_hand()
-    n_cards1 = get_n_cards_1()
+    n_cards1 = get_num_cards_1()
     game_state = GameState(hand.num_cards(), n_cards1)
     ai = AIPlayer(hand, 0, "Computer")
     if debug:
@@ -69,7 +69,7 @@ def init_game():
 def get_play_from_input(user_input):
     """returns card play based on user's input"""
     if not user_input:
-        return None
+        return Play.get_pass_play()
     player_card_strs = user_input.split()
     played_cards = Card.strs_to_cards(player_card_strs)
     return Play.get_play_from_cards(played_cards)

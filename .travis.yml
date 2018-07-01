@@ -3,10 +3,10 @@ python:
   - "3.6"
 
 install:
-  - pip install codecov
+  - pip install pytest pytest-cov
 
 script:
-  - pytest -s
+  - pytest --cov=./ -s
   - python3 ai_simulations.py 2 30
 
 after_success:

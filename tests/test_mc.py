@@ -4,7 +4,7 @@ Testing module for Monte Carlo simulations
 
 import time
 
-from pokai.ai_tools.monte_carlo import *
+from pokai.ai.monte_carlo import *
 from pokai.game.card import Card
 from pokai.game.hand import Hand
 from pokai.game.player import Player

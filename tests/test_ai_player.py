@@ -8,7 +8,7 @@ from pokai.game.card import Card
 from pokai.game.game_state import GameState
 from pokai.game.card_play import Play
 from pokai.game.hand import Hand
-from pokai.game.aiplayer import AIPlayer
+from pokai.ai.aiplayer import AIPlayer
 from pokai.game.game_tools import SINGLES, DOUBLES, TRIPLES, QUADRUPLES, STRAIGHTS,\
                                  DOUBLE_STRAIGHTS, ADJ_TRIPLES, DOUBLE_JOKER
 

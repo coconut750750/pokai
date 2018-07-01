@@ -11,7 +11,7 @@ from pokai.game.game_tools import TOTAL_CARDS
 
 def percent(numerator, denominator):
     """return percentage based off of numberator and denominator"""
-    return int(numerator * 100 / denominator) / 100
+    return round(numerator / denominator, 2)
 
 def choose(n, r):
     """

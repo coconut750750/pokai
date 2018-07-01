@@ -1,6 +1,9 @@
 """
-Runs simulations with Player and AIPlayer and compares
+Runs simulations with Player and AIPlayer and compares their performances
+
+Example usage: python3 ai_simuations 2 50
 """
+
 import argparse
 from time import time
 
@@ -8,8 +11,8 @@ from pokai.game.card import Card
 from pokai.game.game_state import GameState
 from pokai.game.hand import Hand
 from pokai.game.player import Player
-from pokai.game.aiplayer import AIPlayer
-from pokai.ai_tools.monte_carlo import simulate, simulate_multiprocesses
+from pokai.ai.aiplayer import AIPlayer
+from pokai.ai.monte_carlo import simulate, simulate_multiprocesses
 
 parser = argparse.ArgumentParser(description='Simulate AI and Player.')
 parser.add_argument("hand_strength", type=int, choices=[1, 2, 3], 

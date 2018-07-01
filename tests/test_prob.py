@@ -6,7 +6,7 @@ import time
 from itertools import combinations, groupby
 import random
 
-from pokai.ai_tools.probabilities import _prob_of_doubles, _prob_of_triples, _prob_of_quads, percent
+from pokai.ai.probabilities import _prob_of_doubles, _prob_of_triples, _prob_of_quads, percent
 from pokai.game.card import Card
 from pokai.game.game_tools import get_new_shuffled_deck
 

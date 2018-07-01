@@ -1,6 +1,13 @@
 language: python
 python:
   - "3.6"
+
+install:
+  - pip install codecov
+
 script:
   - pytest -s
   - python3 ai_simulations.py 2 30
+
+after_success:
+  - codecov

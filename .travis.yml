@@ -4,10 +4,11 @@ python:
 
 install:
   - pip install pytest pytest-cov
+  - pip install codecov
 
 script:
   - pytest --cov=./ -s
-  - python3 ai_simulations.py 2 30
+  - python3 ai_simulations.py 2 20
 
 after_success:
   - codecov

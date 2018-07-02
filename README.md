@@ -1,5 +1,7 @@
 # PokAI #
 [![Build Status](https://travis-ci.org/coconut750750/pokai.svg?branch=master)](https://travis-ci.org/coconut750750/pokai)
+[![codecov](https://codecov.io/gh/coconut750750/pokai/branch/master/graph/badge.svg)](https://codecov.io/gh/coconut750750/pokai)
+
 
 ## Overview ##
 PokAI is an AI system designed in Python 3 to play the Chinese game Landlord (Dou Dizhu), a game similar to Big 2 except with a few extra types of playable hands. 

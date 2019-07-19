@@ -3,12 +3,11 @@ python:
   - "3.6"
 
 install:
-  - pip install pytest pytest-cov
+  - pip install --upgrade pytest pytest-cov
   - pip install codecov
 
 script:
   - pytest --cov=./ -s
-  - python3 ai_simulations.py 2 20
 
 after_success:
   - codecov

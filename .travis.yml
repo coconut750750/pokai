@@ -8,7 +8,6 @@ install:
 
 script:
   - pytest --cov=./ -s
-  - python3 ai_simulations.py 2 20
 
 after_success:
   - codecov
